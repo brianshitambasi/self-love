@@ -1,4 +1,4 @@
-// components/HomeComponent.jsx - Fixed with no warnings
+// components/HomeComponent.jsx - Complete Updated Version
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import CoffeeCalendar from './CoffeeCalendar';
@@ -19,26 +19,24 @@ const HomeComponent = () => {
 
   // --- 3D Scene Setup ---
   useEffect(() => {
-    // Store ref values in local variables for cleanup
-    const mountNode = mountRef.current;
-    if (!mountNode) return;
+    if (!mountRef.current) return;
     
     // Cleanup any existing renderer
     if (rendererRef.current) {
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
-        animationIdRef.current = null;
       }
-      if (mountNode && rendererRef.current.domElement && mountNode.contains(rendererRef.current.domElement)) {
+      if (mountRef.current && rendererRef.current.domElement) {
         try {
-          mountNode.removeChild(rendererRef.current.domElement);
+          mountRef.current.removeChild(rendererRef.current.domElement);
         } catch (e) {
-          // Ignore cleanup errors
+          console.warn('Cleanup error:', e);
         }
       }
       rendererRef.current.dispose();
-      rendererRef.current = null;
     }
+
+    const mountNode = mountRef.current;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x05070a);
@@ -55,7 +53,6 @@ const HomeComponent = () => {
     renderer.setPixelRatio(window.devicePixelRatio);
     rendererRef.current = renderer;
     
-    // Safely append renderer
     if (mountNode && !mountNode.contains(renderer.domElement)) {
       mountNode.appendChild(renderer.domElement);
     }
@@ -207,7 +204,6 @@ const HomeComponent = () => {
     };
     window.addEventListener('resize', handleResize);
     
-    // Cleanup function using local variables
     return () => {
       window.removeEventListener('resize', handleResize);
       
@@ -217,9 +213,11 @@ const HomeComponent = () => {
       }
       
       if (rendererRef.current) {
-        if (mountNode && rendererRef.current.domElement && mountNode.contains(rendererRef.current.domElement)) {
+        if (mountRef.current && rendererRef.current.domElement) {
           try {
-            mountNode.removeChild(rendererRef.current.domElement);
+            if (mountRef.current.contains(rendererRef.current.domElement)) {
+              mountRef.current.removeChild(rendererRef.current.domElement);
+            }
           } catch (e) {
             // Ignore cleanup errors
           }
@@ -235,7 +233,7 @@ const HomeComponent = () => {
       
       cameraRef.current = null;
     };
-  }, []); // Empty dependency array is correct since we want this to run once
+  }, []);
 
   const handleCoffeeSchedule = (bookingData) => {
     console.log('Coffee booking confirmed:', bookingData);
@@ -286,12 +284,16 @@ const HomeComponent = () => {
     { icon: "fa-handshake", title: "Business Consulting", desc: "Strategic growth planning" }
   ];
 
+  // Updated social media links with all platforms
   const links = [
     { icon: "fa-gem", title: "GO DIAMOND PROJECT", color: "#ffd700", url: "/diamond" },
     { icon: "fa-github", title: "GITHUB", color: "#ffffff", url: "https://github.com/brianshitambasi" },
-    { icon: "fa-linkedin", title: "LINKEDIN", color: "#0077b5", url: "https://linkedin.com/in/brianshitambasi" },
-    { icon: "fa-facebook", title: "FACEBOOK", color: "#3b5998", url: "https://facebook.com" },
-    { icon: "fa-instagram", title: "INSTAGRAM", color: "#e4405f", url: "https://instagram.com" }
+    { icon: "fa-linkedin", title: "LINKEDIN", color: "#0077b5", url: "https://www.linkedin.com/in/brianshitambasi" },
+    { icon: "fa-twitter", title: "X (TWITTER)", color: "#1DA1F2", url: "https://twitter.com/brianshitambasi" },
+    { icon: "fa-facebook", title: "FACEBOOK", color: "#3b5998", url: "https://facebook.com/brianshitambasi" },
+    { icon: "fa-instagram", title: "INSTAGRAM", color: "#e4405f", url: "https://instagram.com/brianshitambasi" },
+    { icon: "fa-youtube", title: "YOUTUBE", color: "#FF0000", url: "https://youtube.com/@brianshitambasi" },
+    { icon: "fa-envelope", title: "EMAIL ME", color: "#ffd700", url: "mailto:brianshtambasi270@gmail.com" }
   ];
 
   return (
@@ -495,6 +497,50 @@ const HomeComponent = () => {
           </div>
         </div>
 
+        {/* Contact Info Section */}
+        <div className="container" style={{ marginBottom: '4rem' }}>
+          <div className="row justify-content-center">
+            <div className="col-lg-10">
+              <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                <h2 style={{ color: '#ffd700', fontWeight: 'bold' }}>
+                  <i className="fas fa-address-card me-2"></i> Contact Information
+                </h2>
+                <p style={{ color: '#aaa' }}>Reach out to me directly</p>
+              </div>
+              <div style={contactStyles.container}>
+                <div style={contactStyles.card}>
+                  <i className="fas fa-envelope" style={contactStyles.icon}></i>
+                  <h4 style={contactStyles.title}>Email</h4>
+                  <a href="mailto:brianshtambasi270@gmail.com" style={contactStyles.link}>
+                    brianshtambasi270@gmail.com
+                  </a>
+                </div>
+                <div style={contactStyles.card}>
+                  <i className="fab fa-linkedin" style={contactStyles.icon}></i>
+                  <h4 style={contactStyles.title}>LinkedIn</h4>
+                  <a href="https://www.linkedin.com/in/brianshitambasi" target="_blank" rel="noopener noreferrer" style={contactStyles.link}>
+                    linkedin.com/in/brianshitambasi
+                  </a>
+                </div>
+                <div style={contactStyles.card}>
+                  <i className="fab fa-twitter" style={contactStyles.icon}></i>
+                  <h4 style={contactStyles.title}>X (Twitter)</h4>
+                  <a href="https://twitter.com/brianshitambasi" target="_blank" rel="noopener noreferrer" style={contactStyles.link}>
+                    @brianshitambasi
+                  </a>
+                </div>
+                <div style={contactStyles.card}>
+                  <i className="fab fa-github" style={contactStyles.icon}></i>
+                  <h4 style={contactStyles.title}>GitHub</h4>
+                  <a href="https://github.com/brianshitambasi" target="_blank" rel="noopener noreferrer" style={contactStyles.link}>
+                    github.com/brianshitambasi
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Connect Section */}
         <div className="container" style={{ marginBottom: '4rem' }}>
           <div className="row justify-content-center">
@@ -510,8 +556,8 @@ const HomeComponent = () => {
                   <a
                     key={idx}
                     href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={link.url.startsWith('http') || link.url.startsWith('mailto') ? "_blank" : "_self"}
+                    rel={link.url.startsWith('http') ? "noopener noreferrer" : ""}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -778,6 +824,42 @@ const statStyles = {
     color: '#aaa',
     fontSize: '0.8rem',
     marginBottom: 0
+  }
+};
+
+const contactStyles = {
+  container: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem',
+    marginTop: '2rem'
+  },
+  card: {
+    background: 'rgba(15, 20, 35, 0.85)',
+    backdropFilter: 'blur(16px)',
+    borderRadius: '1.5rem',
+    padding: '1.5rem',
+    textAlign: 'center',
+    border: '1px solid rgba(255,215,0,0.2)',
+    transition: 'all 0.3s'
+  },
+  icon: {
+    fontSize: '2rem',
+    color: '#ffd700',
+    marginBottom: '1rem'
+  },
+  title: {
+    color: '#ffd700',
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem'
+  },
+  link: {
+    color: '#aaa',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    transition: 'color 0.3s',
+    wordBreak: 'break-all'
   }
 };
 
