@@ -16,10 +16,43 @@ const Footer = () => {
               Empowering entrepreneurs to become next-gen CEOs through network marketing excellence.
             </p>
             <div style={styles.socialLinks}>
-              <a href="#" style={styles.socialIcon}><i className="fab fa-facebook-f"></i></a>
-              <a href="#" style={styles.socialIcon}><i className="fab fa-instagram"></i></a>
-              <a href="#" style={styles.socialIcon}><i className="fab fa-linkedin-in"></i></a>
-              <a href="#" style={styles.socialIcon}><i className="fab fa-youtube"></i></a>
+              {/* FIXED: Changed href="#" to real URLs */}
+              <a 
+                href="https://facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={styles.socialIcon}
+                className="social-icon"
+              >
+                <i className="fab fa-facebook-f"></i>
+              </a>
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={styles.socialIcon}
+                className="social-icon"
+              >
+                <i className="fab fa-instagram"></i>
+              </a>
+              <a 
+                href="https://linkedin.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={styles.socialIcon}
+                className="social-icon"
+              >
+                <i className="fab fa-linkedin-in"></i>
+              </a>
+              <a 
+                href="https://youtube.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={styles.socialIcon}
+                className="social-icon"
+              >
+                <i className="fab fa-youtube"></i>
+              </a>
             </div>
           </div>
 
@@ -27,10 +60,11 @@ const Footer = () => {
           <div style={styles.column}>
             <h4 style={styles.columnTitle}>Quick Links</h4>
             <ul style={styles.linkList}>
+              {/* FIXED: Changed href="#contact" to "/contact" */}
               <li><a href="/" style={styles.link}>Home</a></li>
               <li><a href="/about" style={styles.link}>About Me</a></li>
-              <li><a href="#contact" style={styles.link}>Contact</a></li>
-              <li><a href="#privacy" style={styles.link}>Privacy Policy</a></li>
+              <li><a href="/contact" style={styles.link}>Contact</a></li>
+              <li><a href="/privacy" style={styles.link}>Privacy Policy</a></li>
             </ul>
           </div>
 
@@ -38,10 +72,11 @@ const Footer = () => {
           <div style={styles.column}>
             <h4 style={styles.columnTitle}>Programs</h4>
             <ul style={styles.linkList}>
-              <li><a href="#diamond" style={styles.link}>Go Diamond Project</a></li>
-              <li><a href="#webinar" style={styles.link}>Wealth Renaissance</a></li>
-              <li><a href="#coffee" style={styles.link}>Success Coffee Session</a></li>
-              <li><a href="#ecom" style={styles.link}>E-Com Business Builder</a></li>
+              {/* FIXED: Changed href="#diamond" to "/diamond", etc. */}
+              <li><a href="/diamond" style={styles.link}>Go Diamond Project</a></li>
+              <li><a href="/webinar" style={styles.link}>Wealth Renaissance</a></li>
+              <li><a href="/coffee" style={styles.link}>Success Coffee Session</a></li>
+              <li><a href="/ecom" style={styles.link}>E-Com Business Builder</a></li>
             </ul>
           </div>
 
@@ -62,10 +97,11 @@ const Footer = () => {
             © 2025 Apex Legacy. All rights reserved. | Empowering entrepreneurs worldwide
           </p>
           <div style={styles.bottomLinks}>
-            <a href="#cookies" style={styles.bottomLink}>Cookie Preferences</a>
-            <a href="#report" style={styles.bottomLink}>Report</a>
-            <a href="#privacy" style={styles.bottomLink}>Privacy</a>
-            <a href="#explore" style={styles.bottomLink}>Explore</a>
+            {/* FIXED: Changed href="#cookies" to "/cookies", etc. */}
+            <a href="/cookies" style={styles.bottomLink} className="bottom-link">Cookie Preferences</a>
+            <a href="/report" style={styles.bottomLink} className="bottom-link">Report</a>
+            <a href="/privacy" style={styles.bottomLink} className="bottom-link">Privacy</a>
+            <a href="/explore" style={styles.bottomLink} className="bottom-link">Explore</a>
           </div>
         </div>
       </div>
