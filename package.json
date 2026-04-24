@@ -10,7 +10,6 @@
     "bootstrap": "^5.3.8",
     "react": "^19.2.5",
     "react-bootstrap": "^2.10.10",
-    "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.1",
     "react-scripts": "5.0.1",
@@ -18,8 +17,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts start --no-warnings",
+    "build": "react-scripts build --no-warnings",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -40,5 +39,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0"
   }
 }
