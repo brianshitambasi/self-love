@@ -96,8 +96,8 @@ const AboutMe = () => {
   const businessMilestones = [
     {
       year: "2025",
-      title: "Meeting Mr. Yusuf Oballa",
-      description: "Met my good friend Mr. Yusuf Oballa who showed me a business opportunity in network marketing. I saw the potential and decided to pursue it.",
+      title: "Meeting Mr. Yusuf obalu",
+      description: "Met my good friend Mr. Yusuf obalu who showed me a business opportunity in network marketing. I saw the potential and decided to pursue it.",
       icon: "fa-handshake",
       color: "#ffd700"
     },
@@ -121,7 +121,7 @@ const AboutMe = () => {
   const coreValues = [
     { title: "Gratitude First", desc: "Deeply thankful to my parents, family, and mentors who supported my journey.", icon: "fa-heart" },
     { title: "Continuous Learning", desc: "Never stop learning - from high school to Modcom to ALX, growth never ends.", icon: "fa-graduation-cap" },
-    { title: "Community Power", desc: "Success is multiplied when we lift others up, just as Yusuf Oballa lifted me.", icon: "fa-handshake" },
+    { title: "Community Power", desc: "Success is multiplied when we lift others up, just as Yusuf obalu lifted me.", icon: "fa-handshake" },
     { title: "Action Driven", desc: "Ideas without execution are just dreams - take action daily.", icon: "fa-bolt" }
   ];
 
@@ -183,7 +183,7 @@ const AboutMe = () => {
               I then joined <strong style={{ color: '#ffd700' }}>ALX Africa</strong> for their Software Engineering program, where I gained world-class software development skills. This journey of continuous learning shaped me into the engineer I am today.
             </p>
             <p className="mb-4" style={{ color: '#ccc' }}>
-              Through my good friend <strong style={{ color: '#ffd700' }}>Mr. Yusuf Oballa</strong>, I discovered network marketing. I saw it as a great opportunity to create financial freedom. My parents <strong style={{ color: '#ffd700' }}>Mr. Wycliffe Mukhanya</strong> and <strong style={{ color: '#ffd700' }}>Miss Catherine Nelima</strong>, along with my brothers and sisters, supported me through everything. I am truly lucky and forever grateful for their support.
+              Through my good friend <strong style={{ color: '#ffd700' }}>Mr. Yusuf obalu</strong>, I discovered network marketing. I saw it as a great opportunity to create financial freedom. My parents <strong style={{ color: '#ffd700' }}>Mr. Wycliffe Mukhanya</strong> and <strong style={{ color: '#ffd700' }}>Miss Catherine Nelima</strong>, along with my brothers and sisters, supported me through everything. I am truly lucky and forever grateful for their support.
             </p>
             <div className="row g-3">
               <div className="col-6">
@@ -249,7 +249,7 @@ const AboutMe = () => {
       <div className="row mb-5">
         <div className="col-12 text-center mb-4">
           <h2 className="fw-bold display-6" style={{ color: '#fff' }}>My <span style={{ color: '#ffd700' }}>Business</span> Journey</h2>
-          <p style={{ color: '#aaa' }}>From meeting Yusuf Oballa to launching Apex Legacy</p>
+          <p style={{ color: '#aaa' }}>From meeting Yusuf obalu to launching Apex Legacy</p>
         </div>
         <div className="col-12">
           <div className="position-relative">
