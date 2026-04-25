@@ -6,10 +6,10 @@ import HomeComponent from './components/HomeComponent';
 import AboutMe from './components/AboutMe';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import GoDiamondPage from './components/GoDiamondPage'; // Import the fullscreen page
 import './App.css';
 
 function App() {
-  // Add mobile dropdown functionality
   useEffect(() => {
     const handleDropdownClick = (e) => {
       const header = e.target.closest('.dropdown-mobile-header');
@@ -41,6 +41,7 @@ function App() {
           <Route path="/" element={<HomeComponent />} />
           <Route path="/about" element={<AboutMe />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/go-diamond" element={<GoDiamondPage />} />
         </Routes>
         <Footer />
       </div>

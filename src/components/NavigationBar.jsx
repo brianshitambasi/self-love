@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const NavigationBar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -33,6 +34,11 @@ const NavigationBar = () => {
     window.addEventListener('scroll', handleScrollProgress);
     return () => window.removeEventListener('scroll', handleScrollProgress);
   }, []);
+
+  // Handle Go Diamond button click
+  const handleGoDiamondClick = () => {
+    navigate('/go-diamond');
+  };
 
   // Inject styles
   useEffect(() => {
@@ -350,7 +356,10 @@ const NavigationBar = () => {
                 </Link>
               </li>
               <li className="nav-item">
-                <button className="btn-diamond ms-lg-3">
+                <button 
+                  className="btn-diamond ms-lg-3"
+                  onClick={handleGoDiamondClick}
+                >
                   <i className="fas fa-gem"></i>
                   <span>Go Diamond</span>
                   <i className="fas fa-arrow-right"></i>
