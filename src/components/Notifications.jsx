@@ -1,97 +1,90 @@
-// components/Notifications.jsx
+// components/Notifications.jsx - Updated to load real notifications
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Button, Badge, Tabs, Tab } from 'react-bootstrap';
+import { Container, Card, Button, Badge } from 'react-bootstrap';
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'booking',
-      title: 'Coffee Chat Scheduled',
-      message: 'Your coffee chat with Brian Shitambasi has been confirmed for tomorrow at 10:00 AM.',
-      date: '2024-01-19T10:00:00',
-      read: false,
-      icon: 'fa-coffee',
-      color: '#ffd700',
-      actionLink: '/bookings'
-    },
-    {
-      id: 2,
-      type: 'webinar',
-      title: 'Webinar Reminder',
-      message: 'Wealth Renaissance Webinar starts in 2 hours! Join us live at 7:00 PM.',
-      date: '2024-01-18T17:00:00',
-      read: false,
-      icon: 'fa-video',
-      color: '#ff6347',
-      actionLink: '/webinar'
-    },
-    {
-      id: 3,
-      type: 'achievement',
-      title: 'Achievement Unlocked! 🎉',
-      message: 'Congratulations! You\'ve completed your first coffee chat session.',
-      date: '2024-01-15T08:00:00',
-      read: true,
-      icon: 'fa-trophy',
-      color: '#4caf50',
-      actionLink: '/dashboard'
-    },
-    {
-      id: 4,
-      type: 'update',
-      title: 'New Program Available',
-      message: 'The Go Diamond Project has new training modules added. Check them out!',
-      date: '2024-01-12T09:00:00',
-      read: true,
-      icon: 'fa-gem',
-      color: '#ffd700',
-      actionLink: '/go-diamond'
-    },
-    {
-      id: 5,
-      type: 'reminder',
-      title: 'Profile Completion',
-      message: 'Your profile is 85% complete. Add your bio and social links to reach 100%!',
-      date: '2024-01-10T14:00:00',
-      read: false,
-      icon: 'fa-user-circle',
-      color: '#2196f3',
-      actionLink: '/profile'
-    }
-  ]);
-
+  const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
 
+  // Load notifications from localStorage on mount
   useEffect(() => {
-    // Update notification count in localStorage for the navbar badge
-    const unreadCount = notifications.filter(n => !n.read).length;
-    localStorage.setItem('notificationCount', unreadCount);
+    loadNotifications();
     
-    // Also update the navbar if needed (you can use a global state management or event)
-    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unreadCount }));
-  }, [notifications]);
+    // Listen for storage changes (in case notifications are added in another tab)
+    window.addEventListener('storage', loadNotifications);
+    
+    // Listen for custom notification update event
+    window.addEventListener('notificationUpdate', () => loadNotifications());
+    
+    return () => {
+      window.removeEventListener('storage', loadNotifications);
+      window.removeEventListener('notificationUpdate', () => loadNotifications());
+    };
+  }, []);
+
+  const loadNotifications = () => {
+    const storedNotifications = localStorage.getItem('userNotifications');
+    if (storedNotifications) {
+      setNotifications(JSON.parse(storedNotifications));
+    } else {
+      // Add default welcome notification if no notifications exist
+      const defaultNotifications = [
+        {
+          id: Date.now(),
+          type: 'welcome',
+          title: 'Welcome to Apex Legacy! 🎉',
+          message: 'Thank you for joining our community. Schedule your first coffee chat to get started!',
+          date: new Date().toISOString(),
+          read: false,
+          icon: 'fa-gem',
+          color: '#ffd700',
+          actionLink: '/'
+        }
+      ];
+      localStorage.setItem('userNotifications', JSON.stringify(defaultNotifications));
+      setNotifications(defaultNotifications);
+    }
+  };
 
   const markAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      )
+    const updatedNotifications = notifications.map(notif => 
+      notif.id === id ? { ...notif, read: true } : notif
     );
+    setNotifications(updatedNotifications);
+    localStorage.setItem('userNotifications', JSON.stringify(updatedNotifications));
+    
+    // Update notification count
+    const unreadCount = updatedNotifications.filter(n => !n.read).length;
+    localStorage.setItem('notificationCount', unreadCount);
+    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unreadCount }));
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, read: true }))
-    );
+    const updatedNotifications = notifications.map(notif => ({ ...notif, read: true }));
+    setNotifications(updatedNotifications);
+    localStorage.setItem('userNotifications', JSON.stringify(updatedNotifications));
+    
+    // Update notification count
+    localStorage.setItem('notificationCount', 0);
+    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: 0 }));
   };
 
   const deleteNotification = (id) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
+    const updatedNotifications = notifications.filter(notif => notif.id !== id);
+    setNotifications(updatedNotifications);
+    localStorage.setItem('userNotifications', JSON.stringify(updatedNotifications));
+    
+    // Update notification count
+    const unreadCount = updatedNotifications.filter(n => !n.read).length;
+    localStorage.setItem('notificationCount', unreadCount);
+    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unreadCount }));
   };
 
   const clearAll = () => {
     setNotifications([]);
+    localStorage.setItem('userNotifications', JSON.stringify([]));
+    localStorage.setItem('notificationCount', 0);
+    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: 0 }));
   };
 
   const getTimeAgo = (dateString) => {
@@ -121,6 +114,32 @@ const Notifications = () => {
 
   const filteredNotifications = getFilteredNotifications();
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Get notification icon based on type
+  const getNotificationIcon = (type) => {
+    const icons = {
+      booking: 'fa-coffee',
+      webinar: 'fa-video',
+      achievement: 'fa-trophy',
+      update: 'fa-gem',
+      reminder: 'fa-clock',
+      welcome: 'fa-hand-peace'
+    };
+    return icons[type] || 'fa-bell';
+  };
+
+  // Get notification color based on type
+  const getNotificationColor = (type) => {
+    const colors = {
+      booking: '#ffd700',
+      webinar: '#ff6347',
+      achievement: '#4caf50',
+      update: '#ffd700',
+      reminder: '#2196f3',
+      welcome: '#ffd700'
+    };
+    return colors[type] || '#ffd700';
+  };
 
   return (
     <section style={{ 
@@ -226,7 +245,15 @@ const Notifications = () => {
           <Card className="border-0 rounded-4 text-center p-5" style={{ background: 'rgba(15, 20, 30, 0.85)', border: '1px solid rgba(255,215,0,0.2)' }}>
             <i className="fas fa-bell-slash fa-4x mb-3" style={{ color: '#aaa' }}></i>
             <h4 style={{ color: '#fff' }}>No notifications</h4>
-            <p style={{ color: '#aaa' }}>You're all caught up! Check back later for updates.</p>
+            <p style={{ color: '#aaa' }}>You're all caught up! Schedule a coffee chat to get started.</p>
+            <Button 
+              variant="warning" 
+              className="rounded-pill mt-3 mx-auto"
+              style={{ maxWidth: '200px' }}
+              onClick={() => window.location.href = '/'}
+            >
+              <i className="fas fa-coffee me-2"></i> Schedule Coffee Chat
+            </Button>
           </Card>
         ) : (
           <div className="notifications-list">
@@ -242,7 +269,9 @@ const Notifications = () => {
                 }}
                 onClick={() => {
                   markAsRead(notification.id);
-                  window.location.href = notification.actionLink;
+                  if (notification.actionLink) {
+                    window.location.href = notification.actionLink;
+                  }
                 }}
               >
                 <Card.Body className="p-4">
@@ -251,10 +280,10 @@ const Notifications = () => {
                       <div className="rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ 
                         width: '55px', 
                         height: '55px', 
-                        background: `${notification.color}20`,
-                        border: `2px solid ${notification.color}`
+                        background: `${notification.color || getNotificationColor(notification.type)}20`,
+                        border: `2px solid ${notification.color || getNotificationColor(notification.type)}`
                       }}>
-                        <i className={`fas ${notification.icon} fa-xl`} style={{ color: notification.color }}></i>
+                        <i className={`fas ${notification.icon || getNotificationIcon(notification.type)} fa-xl`} style={{ color: notification.color || getNotificationColor(notification.type) }}></i>
                       </div>
                     </div>
                     <div className="flex-grow-1">
@@ -298,6 +327,15 @@ const Notifications = () => {
                           </Button>
                         </div>
                       </div>
+                      {/* Show booking details if available */}
+                      {notification.bookingDetails && (
+                        <div className="mt-2 pt-2 border-top" style={{ borderColor: 'rgba(255,215,0,0.1)' }}>
+                          <small style={{ color: '#ffd700' }}>
+                            <i className="fas fa-calendar-check me-1"></i> 
+                            {new Date(notification.bookingDetails.date).toLocaleDateString()} at {notification.bookingDetails.time}
+                          </small>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card.Body>

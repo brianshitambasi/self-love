@@ -1,4 +1,4 @@
-// components/CoffeeCalendar.jsx - Native version (NO react-datepicker)
+// components/CoffeeCalendar.jsx - Fixed notification system
 import React, { useState } from 'react';
 
 const CoffeeCalendar = ({ onClose, onSchedule }) => {
@@ -18,6 +18,80 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
     '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'
   ];
 
+  // Function to add notification to localStorage
+  const addNotification = (bookingData) => {
+    // Get existing notifications
+    let notifications = [];
+    const existingNotifications = localStorage.getItem('userNotifications');
+    
+    if (existingNotifications) {
+      notifications = JSON.parse(existingNotifications);
+    }
+    
+    // Create new notification
+    const newNotification = {
+      id: Date.now(),
+      type: 'booking',
+      title: '☕ Coffee Chat Scheduled!',
+      message: `Your coffee chat has been scheduled for ${new Date(bookingData.date).toLocaleDateString()} at ${bookingData.time}. Brian will contact you via ${bookingData.email}.`,
+      date: new Date().toISOString(),
+      read: false,
+      icon: 'fa-coffee',
+      color: '#ffd700',
+      actionLink: '/bookings',
+      bookingDetails: bookingData
+    };
+    
+    // Add to notifications array (add to beginning)
+    notifications.unshift(newNotification);
+    
+    // Save back to localStorage
+    localStorage.setItem('userNotifications', JSON.stringify(notifications));
+    
+    // Update notification count
+    const unreadCount = notifications.filter(n => !n.read).length;
+    localStorage.setItem('notificationCount', unreadCount);
+    
+    // Dispatch event to update navbar in real-time
+    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unreadCount }));
+    
+    console.log('Notification saved:', newNotification);
+    console.log('All notifications:', notifications);
+    
+    return newNotification;
+  };
+
+  // Function to save booking
+  const saveBooking = (bookingData) => {
+    let bookings = [];
+    const existingBookings = localStorage.getItem('userBookings');
+    
+    if (existingBookings) {
+      bookings = JSON.parse(existingBookings);
+    }
+    
+    const newBooking = {
+      id: Date.now(),
+      type: 'Coffee Chat',
+      date: bookingData.date,
+      time: bookingData.time,
+      status: 'upcoming',
+      icon: 'fa-coffee',
+      color: '#4caf50',
+      with: 'Brian Shitambasi',
+      meetingType: bookingData.meetingType === 'virtual' ? 'Virtual' : 'Phone Call',
+      name: bookingData.name,
+      email: bookingData.email,
+      phone: bookingData.phone,
+      createdAt: new Date().toISOString()
+    };
+    
+    bookings.unshift(newBooking);
+    localStorage.setItem('userBookings', JSON.stringify(bookings));
+    
+    console.log('Booking saved:', newBooking);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -29,13 +103,24 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
       email,
       phone,
       meetingType,
-      bookingId: Date.now().toString()
+      bookingId: Date.now().toString(),
+      createdAt: new Date().toISOString()
     };
 
+    // Simulate API call
     setTimeout(() => {
+      // Save booking to localStorage
+      saveBooking(bookingData);
+      
+      // Add notification to the system
+      const notification = addNotification(bookingData);
+      
       onSchedule(bookingData);
       setIsSubmitting(false);
-      alert(`☕ Coffee session scheduled for ${new Date(selectedDate).toLocaleDateString()} at ${selectedTime}!\n\nCheck your email (${email}) for confirmation.`);
+      
+      // Show success message with notification details
+      alert(`✅ Coffee session scheduled successfully!\n\n📅 Date: ${new Date(selectedDate).toLocaleDateString()}\n⏰ Time: ${selectedTime}\n📧 Confirmation sent to: ${email}\n\n🔔 A notification has been added to your notification center. Click the bell icon to view it!`);
+      
       onClose();
     }, 1000);
   };
@@ -131,7 +216,7 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
                 style={styles.input}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (555) 000-0000"
+                placeholder="+254 XXX XXX XXX"
               />
             </div>
 
