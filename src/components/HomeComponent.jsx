@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import CoffeeCalendar from './CoffeeCalendar';
+import { isAuthenticated, getUserRole, ROLES } from '../utils/auth';
 
 const HomeComponent = () => {
   const mountRef = useRef(null);
@@ -16,12 +17,19 @@ const HomeComponent = () => {
   const [webinarName, setWebinarName] = useState('');
   const [isSubmittingWebinar, setIsSubmittingWebinar] = useState(false);
   const [webinarMessage, setWebinarMessage] = useState('');
+  const [isAuth, setIsAuth] = useState(false);
+  const [userRole, setUserRole] = useState('guest');
+
+  // Check authentication status
+  useEffect(() => {
+    setIsAuth(isAuthenticated());
+    setUserRole(getUserRole());
+  }, []);
 
   // --- 3D Scene Setup ---
   useEffect(() => {
     if (!mountRef.current) return;
     
-    // Cleanup any existing renderer
     if (rendererRef.current) {
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
@@ -69,7 +77,6 @@ const HomeComponent = () => {
     const coreMesh = new THREE.Mesh(geometry, material);
     scene.add(coreMesh);
 
-    // Gold wireframe
     const edgesGeo = new THREE.EdgesGeometry(geometry);
     const edgesMat = new THREE.LineBasicMaterial({ color: 0xffaa33 });
     const wireframe = new THREE.LineSegments(edgesGeo, edgesMat);
@@ -269,7 +276,6 @@ const HomeComponent = () => {
     }, 1500);
   };
 
-  // Skills data
   const skills = [
     { icon: "fa-code", title: "Full Stack Dev", desc: "React, Node.js, Python, MongoDB", color: "#3399ff" },
     { icon: "fa-chart-line", title: "Network Marketer", desc: "6-figure earner, team builder", color: "#ffd700" },
@@ -284,7 +290,6 @@ const HomeComponent = () => {
     { icon: "fa-handshake", title: "Business Consulting", desc: "Strategic growth planning" }
   ];
 
-  // Updated social media links with all platforms
   const links = [
     { icon: "fa-gem", title: "GO DIAMOND PROJECT", color: "#ffd700", url: "/diamond" },
     { icon: "fa-github", title: "GITHUB", color: "#ffffff", url: "https://github.com/brianshitambasi" },
@@ -307,7 +312,6 @@ const HomeComponent = () => {
           <div className="container text-center">
             <div className="row">
               <div className="col-lg-10 mx-auto">
-                {/* Profile Image */}
                 <div style={profileStyles.profileContainer}>
                   <div style={profileStyles.profileRing}>
                     <div style={profileStyles.profileInner}>
@@ -331,7 +335,6 @@ const HomeComponent = () => {
                   </div>
                 </div>
 
-                {/* Name Badge */}
                 <div className="mb-4">
                   <span style={{ background: 'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(51,153,255,0.2))', padding: '0.5rem 1.5rem', borderRadius: '50px', backdropFilter: 'blur(10px)' }}>
                     <i className="fas fa-crown text-warning me-2"></i>
@@ -339,7 +342,6 @@ const HomeComponent = () => {
                   </span>
                 </div>
 
-                {/* Main Title */}
                 <h1 style={{ 
                   fontSize: 'clamp(2.5rem, 8vw, 5rem)', 
                   fontWeight: '800',
@@ -360,7 +362,6 @@ const HomeComponent = () => {
                   💻 Full Stack Developer | 📈 Network Marketing Professional | 🎯 Helping You Achieve Financial Freedom
                 </p>
 
-                {/* CTA Buttons */}
                 <div className="d-flex flex-wrap gap-3 justify-content-center mb-5">
                   <button 
                     onClick={() => setShowCoffeeModal(true)}
@@ -388,17 +389,78 @@ const HomeComponent = () => {
                   </a>
                 </div>
 
-                {/* Quote */}
+                {/* Admin Only Section - Only visible to you */}
+                {userRole === ROLES.ADMIN && (
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, rgba(255,0,0,0.15), rgba(255,100,50,0.1))',
+                    backdropFilter: 'blur(15px)',
+                    borderRadius: '2rem',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                    marginBottom: '1rem',
+                    border: '1px solid rgba(255,0,0,0.3)'
+                  }}>
+                    <i className="fas fa-shield-alt fa-2x" style={{ color: '#ff4444' }}></i>
+                    <h3 style={{ color: '#ff4444', marginTop: '0.5rem' }}>Admin Panel</h3>
+                    <p style={{ color: '#ddd' }}>Welcome back, Brian! You have full access to all features.</p>
+                    <div className="d-flex gap-2 justify-content-center">
+                      <button className="btn btn-danger btn-sm" onClick={() => window.location.href = '/admin/users'}>Manage Users</button>
+                      <button className="btn btn-warning btn-sm" onClick={() => window.location.href = '/admin/analytics'}>View Analytics</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* User Only Section - Visible only when logged in */}
+                {isAuth && userRole !== ROLES.ADMIN && (
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, rgba(76,175,80,0.15), rgba(51,153,255,0.1))',
+                    backdropFilter: 'blur(15px)',
+                    borderRadius: '2rem',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                    marginBottom: '1rem',
+                    border: '1px solid rgba(76,175,80,0.3)'
+                  }}>
+                    <i className="fas fa-star-of-life fa-2x" style={{ color: '#4caf50' }}></i>
+                    <h3 style={{ color: '#4caf50', marginTop: '0.5rem' }}>Member Benefits</h3>
+                    <p style={{ color: '#ddd' }}>Access exclusive content, track your progress, and get personalized mentorship.</p>
+                    <div className="d-flex gap-2 justify-content-center">
+                      <button className="btn btn-success btn-sm" onClick={() => window.location.href = '/dashboard'}>Go to Dashboard</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Guest Only Section - Only for non-logged in users */}
+                {!isAuth && (
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,100,50,0.1))',
+                    backdropFilter: 'blur(15px)',
+                    borderRadius: '2rem',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                    marginBottom: '1rem',
+                    border: '1px solid rgba(255,215,0,0.3)'
+                  }}>
+                    <i className="fas fa-gem fa-2x text-warning"></i>
+                    <h3 style={{ color: '#ffd700', marginTop: '0.5rem' }}>Join Apex Legacy Today!</h3>
+                    <p style={{ color: '#ddd' }}>Create a free account to book coffee chats, access exclusive content, and start your journey to financial freedom.</p>
+                    <div className="d-flex gap-2 justify-content-center">
+                      <button className="btn btn-warning btn-sm" onClick={() => window.location.href = '/login'}>Sign Up Free</button>
+                      <button className="btn btn-outline-warning btn-sm" onClick={() => window.location.href = '/login'}>Learn More</button>
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ 
                   background: 'linear-gradient(135deg, rgba(255,215,0,0.1), rgba(51,153,255,0.1))',
                   backdropFilter: 'blur(15px)',
                   borderRadius: '2rem',
-                  padding: '1.5rem',
-                  marginTop: '2rem',
+                  padding: '1rem',
+                  marginTop: '1rem',
                   border: '1px solid rgba(255,215,0,0.3)'
                 }}>
                   <i className="fas fa-quote-left fa-2x" style={{ color: '#ffd700', opacity: 0.5 }}></i>
-                  <p style={{ color: '#ddd', fontSize: '1.1rem', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                  <p style={{ color: '#ddd', fontSize: '1rem', marginTop: '0.5rem', fontStyle: 'italic' }}>
                     "Code your future, build your legacy, and help others climb with you."
                   </p>
                   <p style={{ color: '#ffd700', marginBottom: 0 }}>— Brian Shitambasi</p>
@@ -408,7 +470,7 @@ const HomeComponent = () => {
           </div>
         </section>
 
-        {/* Skills Section */}
+        {/* Skills Section - Visible to all */}
         <div className="container" style={{ marginBottom: '4rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 style={{ color: '#ffd700', fontWeight: 'bold' }}>
@@ -440,7 +502,7 @@ const HomeComponent = () => {
           </div>
         </div>
 
-        {/* Services Section */}
+        {/* Services Section - Visible to all */}
         <div className="container" style={{ marginBottom: '4rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h2 style={{ color: '#ffd700', fontWeight: 'bold' }}>
@@ -463,7 +525,7 @@ const HomeComponent = () => {
           </div>
         </div>
 
-        {/* Stats Section */}
+        {/* Stats Section - Visible to all */}
         <div className="container" style={{ marginBottom: '4rem' }}>
           <div className="row g-4">
             <div className="col-md-3 col-6">
@@ -497,7 +559,7 @@ const HomeComponent = () => {
           </div>
         </div>
 
-        {/* Contact Info Section */}
+        {/* Contact Info Section - Visible to all */}
         <div className="container" style={{ marginBottom: '4rem' }}>
           <div className="row justify-content-center">
             <div className="col-lg-10">
@@ -541,7 +603,7 @@ const HomeComponent = () => {
           </div>
         </div>
 
-        {/* Connect Section */}
+        {/* Connect Section - Visible to all */}
         <div className="container" style={{ marginBottom: '4rem' }}>
           <div className="row justify-content-center">
             <div className="col-lg-8">
@@ -587,7 +649,7 @@ const HomeComponent = () => {
         </div>
       </div>
 
-      {/* Coffee Calendar Modal */}
+      {/* Coffee Calendar Modal - Visible to all */}
       {showCoffeeModal && (
         <CoffeeCalendar 
           onClose={() => setShowCoffeeModal(false)}
@@ -595,7 +657,7 @@ const HomeComponent = () => {
         />
       )}
 
-      {/* Webinar Modal */}
+      {/* Webinar Modal - Visible to all */}
       {showWebinarModal && (
         <div style={modalStyles.overlay} onClick={() => setShowWebinarModal(false)}>
           <div style={modalStyles.modal} onClick={e => e.stopPropagation()}>

@@ -1,4 +1,4 @@
-// components/SignIn.jsx
+// components/SignIn.jsx - Updated with proper user management
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 
@@ -12,6 +12,105 @@ const SignIn = () => {
   });
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState('info');
+
+  // Helper functions
+  const saveUserToLocalStorage = (user) => {
+    // Get existing users
+    const existingUsers = localStorage.getItem('registeredUsers');
+    const users = existingUsers ? JSON.parse(existingUsers) : [];
+    
+    // Check if user already exists
+    const userExists = users.find(u => u.email === user.email);
+    if (!userExists) {
+      users.push(user);
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
+    }
+  };
+
+  const loginUser = (email, password) => {
+    // Admin login (hardcoded for demo - only you can access)
+    if (email === 'admin@apexlegacy.com' && password === 'Brian@2025') {
+      const adminUser = {
+        id: 'admin-001',
+        name: 'Brian Shitambasi',
+        email: email,
+        role: 'admin',
+        isLoggedIn: true,
+        loginTime: new Date().toISOString()
+      };
+      localStorage.setItem('currentUser', JSON.stringify(adminUser));
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', 'admin');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', 'Brian Shitambasi');
+      return { success: true, user: adminUser, role: 'admin' };
+    }
+    
+    // Regular user login
+    const existingUsers = localStorage.getItem('registeredUsers');
+    const users = existingUsers ? JSON.parse(existingUsers) : [];
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+      const loggedInUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: 'user',
+        isLoggedIn: true,
+        loginTime: new Date().toISOString()
+      };
+      localStorage.setItem('currentUser', JSON.stringify(loggedInUser));
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', 'user');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', user.name);
+      return { success: true, user: loggedInUser, role: 'user' };
+    }
+    
+    return { success: false, error: 'Invalid email or password' };
+  };
+
+  const registerUser = (name, email, password) => {
+    const existingUsers = localStorage.getItem('registeredUsers');
+    const users = existingUsers ? JSON.parse(existingUsers) : [];
+    
+    // Check if user already exists
+    if (users.find(u => u.email === email)) {
+      return { success: false, error: 'User already exists with this email' };
+    }
+    
+    const newUser = {
+      id: Date.now().toString(),
+      name: name,
+      email: email,
+      password: password,
+      role: 'user',
+      createdAt: new Date().toISOString(),
+      profileComplete: false
+    };
+    
+    users.push(newUser);
+    localStorage.setItem('registeredUsers', JSON.stringify(users));
+    
+    // Auto login after registration
+    const loggedInUser = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: 'user',
+      isLoggedIn: true,
+      loginTime: new Date().toISOString()
+    };
+    localStorage.setItem('currentUser', JSON.stringify(loggedInUser));
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userRole', 'user');
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('userName', name);
+    
+    return { success: true, user: newUser };
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -24,45 +123,128 @@ const SignIn = () => {
     e.preventDefault();
     
     if (isLogin) {
-      // Demo login - accept any email/password for demo
-      if (formData.email && formData.password) {
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', formData.email);
-        setAlertMessage('Login successful! Redirecting...');
+      // Login
+      if (!formData.email || !formData.password) {
+        setAlertMessage('Please enter email and password');
+        setAlertVariant('danger');
         setShowAlert(true);
+        return;
+      }
+      
+      const result = loginUser(formData.email, formData.password);
+      
+      if (result.success) {
+        setAlertMessage(`Welcome back ${result.user.name}! Redirecting to dashboard...`);
+        setAlertVariant('success');
+        setShowAlert(true);
+        
+        // Create welcome notification for user
+        const welcomeNotification = {
+          id: Date.now(),
+          type: 'login',
+          title: 'Welcome Back! 🎉',
+          message: `Good to see you again, ${result.user.name}! Check out your dashboard for updates.`,
+          date: new Date().toISOString(),
+          read: false,
+          icon: 'fa-smile-wink',
+          color: '#ffd700',
+          actionLink: '/dashboard'
+        };
+        
+        const existingNotifs = localStorage.getItem('userNotifications');
+        const notifications = existingNotifs ? JSON.parse(existingNotifs) : [];
+        notifications.unshift(welcomeNotification);
+        localStorage.setItem('userNotifications', JSON.stringify(notifications));
+        
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 1500);
       } else {
-        setAlertMessage('Please enter email and password');
+        setAlertMessage(result.error);
+        setAlertVariant('danger');
         setShowAlert(true);
       }
     } else {
-      // Demo registration
-      if (formData.name && formData.email && formData.password && formData.password === formData.confirmPassword) {
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', formData.email);
-        localStorage.setItem('userName', formData.name);
-        setAlertMessage('Registration successful! Redirecting...');
+      // Registration
+      if (!formData.name || !formData.email || !formData.password) {
+        setAlertMessage('Please fill in all fields');
+        setAlertVariant('danger');
         setShowAlert(true);
+        return;
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        setAlertMessage('Passwords do not match');
+        setAlertVariant('danger');
+        setShowAlert(true);
+        return;
+      }
+      
+      if (formData.password.length < 6) {
+        setAlertMessage('Password must be at least 6 characters');
+        setAlertVariant('danger');
+        setShowAlert(true);
+        return;
+      }
+      
+      const result = registerUser(formData.name, formData.email, formData.password);
+      
+      if (result.success) {
+        setAlertMessage(`Welcome ${formData.name}! Account created successfully. Redirecting...`);
+        setAlertVariant('success');
+        setShowAlert(true);
+        
+        // Create welcome notification
+        const welcomeNotification = {
+          id: Date.now(),
+          type: 'welcome',
+          title: 'Welcome to Apex Legacy! 🎉',
+          message: `Thank you for joining, ${formData.name}! Start your journey by scheduling a coffee chat with Brian.`,
+          date: new Date().toISOString(),
+          read: false,
+          icon: 'fa-hand-peace',
+          color: '#4caf50',
+          actionLink: '/'
+        };
+        
+        const existingNotifs = localStorage.getItem('userNotifications');
+        const notifications = existingNotifs ? JSON.parse(existingNotifs) : [];
+        notifications.unshift(welcomeNotification);
+        localStorage.setItem('userNotifications', JSON.stringify(notifications));
+        
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 1500);
-      } else if (formData.password !== formData.confirmPassword) {
-        setAlertMessage('Passwords do not match');
-        setShowAlert(true);
       } else {
-        setAlertMessage('Please fill in all fields');
+        setAlertMessage(result.error);
+        setAlertVariant('danger');
         setShowAlert(true);
       }
     }
   };
 
   const handleGuestLogin = () => {
+    const guestUser = {
+      id: 'guest-' + Date.now(),
+      name: 'Guest User',
+      email: 'guest@apexlegacy.com',
+      role: 'guest',
+      isLoggedIn: true,
+      loginTime: new Date().toISOString()
+    };
+    localStorage.setItem('currentUser', JSON.stringify(guestUser));
     localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userRole', 'guest');
     localStorage.setItem('userEmail', 'guest@apexlegacy.com');
     localStorage.setItem('userName', 'Guest User');
-    window.location.href = '/dashboard';
+    
+    setAlertMessage('Continuing as guest. Some features may be limited. Create an account for full access!');
+    setAlertVariant('info');
+    setShowAlert(true);
+    
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 1500);
   };
 
   return (
@@ -92,7 +274,8 @@ const SignIn = () => {
                 </div>
 
                 {showAlert && (
-                  <Alert variant="info" className="rounded-pill text-center" dismissible onClose={() => setShowAlert(false)}>
+                  <Alert variant={alertVariant} className="rounded-pill text-center" dismissible onClose={() => setShowAlert(false)}>
+                    <i className={`fas ${alertVariant === 'success' ? 'fa-check-circle' : alertVariant === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle'} me-2`}></i>
                     {alertMessage}
                   </Alert>
                 )}
@@ -100,7 +283,9 @@ const SignIn = () => {
                 <Form onSubmit={handleSubmit}>
                   {!isLogin && (
                     <Form.Group className="mb-3">
-                      <Form.Label style={{ color: '#ffd700' }}>Full Name</Form.Label>
+                      <Form.Label style={{ color: '#ffd700' }}>
+                        <i className="fas fa-user me-2"></i>Full Name
+                      </Form.Label>
                       <Form.Control
                         type="text"
                         name="name"
@@ -115,7 +300,9 @@ const SignIn = () => {
                   )}
 
                   <Form.Group className="mb-3">
-                    <Form.Label style={{ color: '#ffd700' }}>Email Address</Form.Label>
+                    <Form.Label style={{ color: '#ffd700' }}>
+                      <i className="fas fa-envelope me-2"></i>Email Address
+                    </Form.Label>
                     <Form.Control
                       type="email"
                       name="email"
@@ -129,7 +316,9 @@ const SignIn = () => {
                   </Form.Group>
 
                   <Form.Group className="mb-3">
-                    <Form.Label style={{ color: '#ffd700' }}>Password</Form.Label>
+                    <Form.Label style={{ color: '#ffd700' }}>
+                      <i className="fas fa-lock me-2"></i>Password
+                    </Form.Label>
                     <Form.Control
                       type="password"
                       name="password"
@@ -140,11 +329,16 @@ const SignIn = () => {
                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,215,0,0.3)', color: '#fff' }}
                       required
                     />
+                    {!isLogin && (
+                      <small style={{ color: '#666' }}>Password must be at least 6 characters</small>
+                    )}
                   </Form.Group>
 
                   {!isLogin && (
                     <Form.Group className="mb-3">
-                      <Form.Label style={{ color: '#ffd700' }}>Confirm Password</Form.Label>
+                      <Form.Label style={{ color: '#ffd700' }}>
+                        <i className="fas fa-check-circle me-2"></i>Confirm Password
+                      </Form.Label>
                       <Form.Control
                         type="password"
                         name="confirmPassword"
@@ -199,6 +393,14 @@ const SignIn = () => {
                     </p>
                   </div>
                 </Form>
+
+                {/* Admin Info - Only visible in development */}
+                <div className="mt-3 pt-2 border-top" style={{ borderColor: 'rgba(255,215,0,0.1)' }}>
+                  <small style={{ color: '#555', display: 'block', textAlign: 'center' }}>
+                    <i className="fas fa-shield-alt me-1"></i>
+                    Admin Access: admin@apexlegacy.com
+                  </small>
+                </div>
               </Card.Body>
             </Card>
 
