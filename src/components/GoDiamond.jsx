@@ -1,4 +1,4 @@
-// components/GoDiamond.jsx - Enhanced with massive response database
+// components/GoDiamond.jsx - BrianBot AI Assistant
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -10,7 +10,7 @@ const GoDiamond = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "✨ Welcome to Go Diamond! ✨\n\nI'm your AI assistant here to help you with:\n\n💎 Network Marketing Success\n💻 Full Stack Development\n📈 Business Growth Strategies\n💰 Financial Freedom\n\nWhat would you like to know today?",
+      text: "🤖 Welcome to BrianBot! 🤖\n\nI'm Brian Shitambasi's personal AI assistant. I'm here to help you with:\n\n💎 Network Marketing Success\n💻 Full Stack Development\n📈 Business Growth Strategies\n💰 Financial Freedom\n\nWhat would you like to know today?",
       sender: 'bot',
       timestamp: new Date().toISOString()
     }
@@ -32,9 +32,13 @@ const GoDiamond = () => {
     }
   }, [isOpen]);
 
-  // ============ MASSIVE KNOWLEDGE BASE ============
+  // ============ BRIANBOT KNOWLEDGE BASE ============
   
-  // Network Marketing Categories
+  const brianIntro = {
+    keywords: ['who is brian', 'about brian', 'brian shitambasi', 'tell me about brian', 'founder', 'who created you'],
+    response: "👨‍💻 Brian Shitambasi is a Full Stack Developer, Network Marketing Professional, and Software Engineer. He helps aspiring entrepreneurs achieve financial freedom through:\n\n✨ Tech skills training\n✨ Network marketing strategies\n✨ Business mentorship\n✨ Personal development\n\nConnect with Brian:\n📧 brianshtambasi270@gmail.com\n💼 linkedin.com/in/brianshitambasi\n🐙 github.com/brianshitambasi\n🐦 twitter.com/brianshitambasi"
+  };
+
   const networkMarketingResponses = {
     basics: {
       keywords: ['what is network marketing', 'define mlm', 'network marketing meaning', 'mlm explained'],
@@ -54,7 +58,6 @@ const GoDiamond = () => {
     }
   };
 
-  // Web Development Categories
   const webDevResponses = {
     frontend: {
       keywords: ['frontend', 'react', 'vue', 'angular', 'html', 'css', 'javascript', 'ui/ux'],
@@ -74,7 +77,6 @@ const GoDiamond = () => {
     }
   };
 
-  // Business Growth Categories
   const businessResponses = {
     marketing: {
       keywords: ['marketing', 'social media', 'facebook ads', 'instagram', 'tiktok', 'content'],
@@ -94,7 +96,6 @@ const GoDiamond = () => {
     }
   };
 
-  // Financial Freedom Categories
   const financeResponses = {
     passiveIncome: {
       keywords: ['passive income', 'residual income', 'multiple streams', 'financial freedom'],
@@ -114,7 +115,6 @@ const GoDiamond = () => {
     }
   };
 
-  // Success Stories
   const successStories = [
     { keywords: ['john', 'success story 1'], response: "John M., a former teacher, joined network marketing part-time. Within 8 months, he replaced his full-time income ($5k/month). After 18 months, he hit Diamond rank earning $15k/month and quit teaching. Now he trains others while traveling the world!" },
     { keywords: ['sarah', 'success story 2'], response: "Sarah K., a stay-at-home mom, built a team of 500+ distributors in 14 months. Her monthly income grew from $500 to $12,000. She says the key was consistent social media posting and providing value daily!" },
@@ -123,7 +123,6 @@ const GoDiamond = () => {
     { keywords: ['michael', 'success story 5'], response: "Michael T., a college student, started during COVID. He used TikTok to build his brand, gained 100k followers, and built a team of 50 students. Makes $8k/month while finishing his degree!" }
   ];
 
-  // Training Resources
   const trainingResponses = {
     courses: {
       keywords: ['course', 'training', 'learn', 'education', 'program', 'mentorship'],
@@ -139,13 +138,12 @@ const GoDiamond = () => {
     }
   };
 
-  // Motivational Content
   const motivationalResponses = {
     quotes: {
       keywords: ['quote', 'inspire', 'motivate', 'encouragement', 'wisdom'],
       response: "🔥 Powerful quotes for your journey:\n\n'Your income grows in proportion to your personal growth.' - Jim Rohn\n\n'The only limit to your impact is your imagination and commitment.' - Tony Robbins\n\n'Success is not final, failure is not fatal: it's the courage to continue that counts.' - Winston Churchill\n\n'Don't watch the clock; do what it does. Keep going.' - Sam Levenson\n\nKeep pushing forward! 💎"
     },
-    mindset: {
+    challenge: {
       keywords: ['overcome', 'struggle', 'difficult', 'challenge', 'hard', 'failure'],
       response: "Overcoming challenges mindset:\n\n✅ Every 'no' gets you closer to 'yes'\n✅ Failure is data, not defeat\n✅ Your current situation isn't your final destination\n✅ Small consistent actions create massive results\n✅ Comparison is the thief of joy\n✅ You're exactly where you need to be\n\nWhat specific challenge are you facing?"
     },
@@ -155,7 +153,6 @@ const GoDiamond = () => {
     }
   };
 
-  // Specific Program Details
   const programResponses = {
     goDiamond: {
       keywords: ['go diamond details', 'diamond program curriculum', 'what includes', 'diamond project content'],
@@ -171,8 +168,9 @@ const GoDiamond = () => {
     }
   };
 
-  // Combine all responses into one massive database
+  // Combine all responses
   const allResponses = [
+    brianIntro,
     ...Object.values(networkMarketingResponses),
     ...Object.values(webDevResponses),
     ...Object.values(businessResponses),
@@ -181,29 +179,30 @@ const GoDiamond = () => {
     ...Object.values(trainingResponses),
     ...Object.values(motivationalResponses),
     ...Object.values(programResponses),
-    // Greetings
     {
       keywords: ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'whats up', 'howdy'],
-      response: "Hello! 👋 Great to see you! I'm your Go Diamond assistant. Ready to transform your life? Ask me about:\n\n💎 Network Marketing Success\n💻 Web Development\n📈 Business Growth\n💰 Financial Freedom\n\nWhat fires you up today?"
+      response: "Hello! 👋 I'm BrianBot, Brian Shitambasi's AI assistant. Ready to transform your life? Ask me about:\n\n💎 Network Marketing Success\n💻 Web Development\n📈 Business Growth\n💰 Financial Freedom\n\nWhat fires you up today?"
     },
     {
       keywords: ['thank', 'thanks', 'appreciate', 'grateful', 'you rock'],
       response: "You're very welcome! 🙏\n\nRemember: Every master was once a beginner. Keep asking questions, keep learning, keep growing. Your breakthrough is coming!\n\nWhat else can I help you with today?"
+    },
+    {
+      keywords: ['brianbot', 'brian bot', 'your name', 'what are you'],
+      response: "I'm BrianBot! 🤖 I'm Brian Shitambasi's personal AI assistant. I'm here to answer your questions about network marketing, web development, business growth, and financial freedom. Think of me as your 24/7 guide to success!"
     }
   ];
 
-  // Dynamic response generator (creates infinite variations)
   const generateDynamicResponse = (message) => {
     const lowerMsg = message.toLowerCase();
     const randomVariations = [
-      "That's an excellent question! Let me share what I know...",
-      "Great question! Here's what I've learned...",
-      "I love this question! The answer might surprise you...",
-      "Thanks for asking! Here's the honest truth...",
-      "This is something I'm passionate about. Let me explain..."
+      "Thanks for asking BrianBot! Let me share what I know...",
+      "Great question! Here's what Brian teaches about this...",
+      "I love this question! Let me explain...",
+      "Thanks for reaching out to BrianBot! Here's the answer...",
+      "This is something Brian is passionate about. Let me share..."
     ];
     
-    // Check for specific topics
     if (lowerMsg.includes('time management') || lowerMsg.includes('productivity')) {
       return "Time management strategies that work:\n\n⏰ Pomodoro technique (25 min work/5 min break)\n⏰ Time blocking your calendar\n⏰ Eat that frog (do hardest task first)\n⏰ 80/20 principle - focus on what matters\n⏰ Batch similar tasks together\n⏰ Eliminate distractions during deep work\n\nWhat's your biggest time challenge?";
     }
@@ -224,32 +223,27 @@ const GoDiamond = () => {
       return "High-converting website elements:\n\n🌐 Clear headline and subheadline\n🌐 Strong call-to-action buttons\n🌐 Social proof (testimonials)\n🌐 Mobile responsive design\n🌐 Fast loading speed\n🌐 Simple navigation\n🌐 Trust badges and security\n\nNeed a professional website? Let's chat!";
     }
     
-    // Return random variation from matches
     const randomPrefix = randomVariations[Math.floor(Math.random() * randomVariations.length)];
-    return `${randomPrefix}\n\nI'd love to help you with that! Could you provide more details about what you're looking to achieve? The more specific you are, the better I can assist you on your journey to success! 💎`;
+    return `${randomPrefix}\n\nI'd love to help you with that! Could you provide more details about what you're looking to achieve? The more specific you are, the better BrianBot can assist you on your journey to success! 💎`;
   };
 
   const findResponse = (message) => {
     const lowerMsg = message.toLowerCase();
     
-    // First check all predefined responses
     for (const category of allResponses) {
       if (category.keywords && category.keywords.some(keyword => lowerMsg.includes(keyword))) {
         return category.response;
       }
     }
     
-    // Check for questions about specific amounts
     if (lowerMsg.match(/\d+k|\d+\s*k|\d+\s*thousand|\d+\s*hundred/)) {
       return "Great question about specific numbers! Income varies based on effort, skills, and timing. Here's what's possible:\n\n💰 Beginner: $500-2,000/month\n💰 Intermediate: $3,000-8,000/month\n💰 Advanced: $10,000-50,000+/month\n\nThe GO DIAMOND Project helps you reach advanced levels faster. Want to learn how?";
     }
     
-    // Check for time-related questions
     if (lowerMsg.includes('how long') || lowerMsg.includes('time to')) {
       return "Timeline expectations:\n\n⏱️ First sale: 1-4 weeks\n⏱️ Consistent income: 3-6 months\n⏱️ Full-time income: 6-12 months\n⏱️ Team building results: 8-14 months\n\nEveryone's journey is unique. The key is consistent daily action. Ready to start your timeline?";
     }
     
-    // Generate dynamic response
     return generateDynamicResponse(message);
   };
 
@@ -290,7 +284,7 @@ const GoDiamond = () => {
     setMessages([
       {
         id: Date.now(),
-        text: "✨ Chat cleared! ✨\n\nHow can I help you today? Ask me about network marketing, web development, or the Go Diamond Project!\n\n💎 Remember: Your breakthrough is just one question away!",
+        text: "✨ BrianBot chat cleared! ✨\n\nHow can BrianBot help you today? Ask me about network marketing, web development, or the Go Diamond Project!\n\n💎 Remember: Your breakthrough is just one question away!",
         sender: 'bot',
         timestamp: new Date().toISOString()
       }
@@ -302,9 +296,8 @@ const GoDiamond = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Quick suggestion buttons (now with more options)
   const quickSuggestions = [
-    { text: '💎 Go Diamond Project', query: 'Tell me about Go Diamond Project details' },
+    { text: '💎 Who is Brian?', query: 'Tell me about Brian Shitambasi' },
     { text: '💰 How to make money?', query: 'How can I start making money in network marketing?' },
     { text: '💻 Web development help', query: 'I need help with web development' },
     { text: '📈 Business growth tips', query: 'How can I grow my business faster?' },
@@ -313,21 +306,20 @@ const GoDiamond = () => {
     { text: '📚 Success stories', query: 'Share some success stories from your programs' },
     { text: '🧠 Mindset advice', query: 'I need motivation and mindset advice' },
     { text: '📱 Social media tips', query: 'How to grow on social media?' },
-    { text: '🏆 Leadership skills', query: 'How to become a better leader?' }
+    { text: '🏆 GO Diamond Project', query: 'Tell me about the GO Diamond Project details' }
   ];
 
-  // For fullscreen mode
   if (isFullscreen) {
     return (
       <div style={fullscreenStyles.container}>
         <div style={fullscreenStyles.header}>
           <div style={fullscreenStyles.headerContent}>
             <div style={fullscreenStyles.avatar}>
-              <i className="fas fa-gem" style={{ fontSize: '24px', color: '#ffd700' }}></i>
+              <i className="fas fa-robot" style={{ fontSize: '24px', color: '#ffd700' }}></i>
             </div>
             <div style={fullscreenStyles.headerText}>
-              <h3 style={fullscreenStyles.title}>Go Diamond Assistant</h3>
-              <p style={fullscreenStyles.status}>✨ Online • Ready to help</p>
+              <h3 style={fullscreenStyles.title}>BrianBot 🤖</h3>
+              <p style={fullscreenStyles.status}>✨ Online • Brian's AI Assistant</p>
             </div>
           </div>
           <div style={fullscreenStyles.headerActions}>
@@ -393,7 +385,7 @@ const GoDiamond = () => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message... (Ask me anything about success!)"
+            placeholder="Ask BrianBot anything..."
             style={fullscreenStyles.input}
             rows="1"
           />
@@ -412,7 +404,6 @@ const GoDiamond = () => {
     );
   }
 
-  // For floating button mode
   return (
     <>
       <button
@@ -438,7 +429,7 @@ const GoDiamond = () => {
         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
       >
-        <i className="fas fa-gem" style={{ fontSize: '28px', color: '#1a1a2e' }}></i>
+        <i className="fas fa-robot" style={{ fontSize: '28px', color: '#1a1a2e' }}></i>
       </button>
 
       {isOpen && (
@@ -447,11 +438,11 @@ const GoDiamond = () => {
             <div style={modalStyles.header}>
               <div style={modalStyles.headerContent}>
                 <div style={modalStyles.avatar}>
-                  <i className="fas fa-gem" style={{ fontSize: '24px', color: '#ffd700' }}></i>
+                  <i className="fas fa-robot" style={{ fontSize: '24px', color: '#ffd700' }}></i>
                 </div>
                 <div style={modalStyles.headerText}>
-                  <h3 style={modalStyles.title}>Go Diamond Assistant</h3>
-                  <p style={modalStyles.status}>✨ Online • Ready to help</p>
+                  <h3 style={modalStyles.title}>BrianBot 🤖</h3>
+                  <p style={modalStyles.status}>✨ Online • Brian's AI Assistant</p>
                 </div>
               </div>
               <div style={modalStyles.headerActions}>
@@ -520,7 +511,7 @@ const GoDiamond = () => {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
+                placeholder="Ask BrianBot anything..."
                 style={modalStyles.input}
                 rows="1"
               />
