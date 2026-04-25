@@ -1,4 +1,4 @@
-// components/GoDiamond.jsx - BrianBot AI Assistant - FULLY ENHANCED
+// components/GoDiamond.jsx - BrianBot AI Assistant - FULLY ENHANCED (FIXED)
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -32,7 +32,7 @@ const GoDiamond = () => {
     }
   }, [isOpen]);
 
-  // ============ ENHANCED BRIANBOT KNOWLEDGE BASE ============
+  // ============ BRIANBOT KNOWLEDGE BASE ============
   
   // Detailed Brian Shitambasi Bio
   const brianDetailedBio = {
@@ -210,14 +210,6 @@ const GoDiamond = () => {
     ...Object.values(expandedMotivation),
     ...Object.values(packageResponses),
     ...Object.values(productResponses),
-    ...Object.values(networkMarketingResponses),
-    ...Object.values(webDevResponses),
-    ...Object.values(businessResponses),
-    ...Object.values(financeResponses),
-    ...successStories,
-    ...Object.values(trainingResponses),
-    ...Object.values(motivationalResponses),
-    ...Object.values(programResponses),
     {
       keywords: ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'whats up', 'howdy'],
       response: "Hello! 👋 I'm BrianBot, Brian Shitambasi's AI assistant. Ready to transform your life? Ask me about:\n\n💎 Network Marketing Success\n💻 Web Development\n📈 Business Growth\n💰 Financial Freedom\n🤝 Combining Tech + MLM\n\nWhat fires you up today?"
