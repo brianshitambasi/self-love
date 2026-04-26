@@ -1,6 +1,7 @@
-// components/SignIn.jsx - Updated with proper user management
+// components/SignIn.jsx - Complete with Google Sheets Integration
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { saveUserToSheet } from '../services/api';
 
 const SignIn = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -8,19 +9,19 @@ const SignIn = () => {
     email: '',
     password: '',
     name: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phone: ''
   });
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertVariant, setAlertVariant] = useState('info');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Helper functions
   const saveUserToLocalStorage = (user) => {
-    // Get existing users
     const existingUsers = localStorage.getItem('registeredUsers');
     const users = existingUsers ? JSON.parse(existingUsers) : [];
     
-    // Check if user already exists
     const userExists = users.find(u => u.email === user.email);
     if (!userExists) {
       users.push(user);
@@ -29,7 +30,7 @@ const SignIn = () => {
   };
 
   const loginUser = (email, password) => {
-    // Admin login (hardcoded for demo - only you can access)
+    // Admin login
     if (email === 'admin@apexlegacy.com' && password === 'Brian@2025') {
       const adminUser = {
         id: 'admin-001',
@@ -72,11 +73,10 @@ const SignIn = () => {
     return { success: false, error: 'Invalid email or password' };
   };
 
-  const registerUser = (name, email, password) => {
+  const registerUser = (name, email, password, phone) => {
     const existingUsers = localStorage.getItem('registeredUsers');
     const users = existingUsers ? JSON.parse(existingUsers) : [];
     
-    // Check if user already exists
     if (users.find(u => u.email === email)) {
       return { success: false, error: 'User already exists with this email' };
     }
@@ -86,6 +86,7 @@ const SignIn = () => {
       name: name,
       email: email,
       password: password,
+      phone: phone || '',
       role: 'user',
       createdAt: new Date().toISOString(),
       profileComplete: false
@@ -94,7 +95,6 @@ const SignIn = () => {
     users.push(newUser);
     localStorage.setItem('registeredUsers', JSON.stringify(users));
     
-    // Auto login after registration
     const loggedInUser = {
       id: newUser.id,
       name: newUser.name,
@@ -119,8 +119,9 @@ const SignIn = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     
     if (isLogin) {
       // Login
@@ -128,6 +129,7 @@ const SignIn = () => {
         setAlertMessage('Please enter email and password');
         setAlertVariant('danger');
         setShowAlert(true);
+        setIsLoading(false);
         return;
       }
       
@@ -138,7 +140,6 @@ const SignIn = () => {
         setAlertVariant('success');
         setShowAlert(true);
         
-        // Create welcome notification for user
         const welcomeNotification = {
           id: Date.now(),
           type: 'login',
@@ -163,6 +164,7 @@ const SignIn = () => {
         setAlertMessage(result.error);
         setAlertVariant('danger');
         setShowAlert(true);
+        setIsLoading(false);
       }
     } else {
       // Registration
@@ -170,6 +172,7 @@ const SignIn = () => {
         setAlertMessage('Please fill in all fields');
         setAlertVariant('danger');
         setShowAlert(true);
+        setIsLoading(false);
         return;
       }
       
@@ -177,6 +180,7 @@ const SignIn = () => {
         setAlertMessage('Passwords do not match');
         setAlertVariant('danger');
         setShowAlert(true);
+        setIsLoading(false);
         return;
       }
       
@@ -184,17 +188,30 @@ const SignIn = () => {
         setAlertMessage('Password must be at least 6 characters');
         setAlertVariant('danger');
         setShowAlert(true);
+        setIsLoading(false);
         return;
       }
       
-      const result = registerUser(formData.name, formData.email, formData.password);
+      const result = registerUser(formData.name, formData.email, formData.password, formData.phone);
       
       if (result.success) {
+        // Save to Google Sheets
+        try {
+          await saveUserToSheet({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone || '',
+            referral: 'Website Registration'
+          });
+          console.log('✅ User saved to Google Sheet');
+        } catch (sheetError) {
+          console.error('Error saving to Google Sheet:', sheetError);
+        }
+        
         setAlertMessage(`Welcome ${formData.name}! Account created successfully. Redirecting...`);
         setAlertVariant('success');
         setShowAlert(true);
         
-        // Create welcome notification
         const welcomeNotification = {
           id: Date.now(),
           type: 'welcome',
@@ -219,6 +236,7 @@ const SignIn = () => {
         setAlertMessage(result.error);
         setAlertVariant('danger');
         setShowAlert(true);
+        setIsLoading(false);
       }
     }
   };
@@ -245,6 +263,33 @@ const SignIn = () => {
     setTimeout(() => {
       window.location.href = '/';
     }, 1500);
+  };
+
+  // Test Google Sheets Connection
+  const testGoogleSheets = async () => {
+    setIsLoading(true);
+    try {
+      const result = await saveUserToSheet({
+        name: 'Test User ' + new Date().toLocaleTimeString(),
+        email: 'test@example.com',
+        phone: '1234567890',
+        referral: 'Test Connection'
+      });
+      if (result.success) {
+        setAlertMessage('✅ Test successful! Check your Google Sheet for the test entry.');
+        setAlertVariant('success');
+        setShowAlert(true);
+      } else {
+        setAlertMessage('❌ Test failed: ' + result.error);
+        setAlertVariant('danger');
+        setShowAlert(true);
+      }
+    } catch (error) {
+      setAlertMessage('❌ Error: ' + error.message);
+      setAlertVariant('danger');
+      setShowAlert(true);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -282,21 +327,38 @@ const SignIn = () => {
 
                 <Form onSubmit={handleSubmit}>
                   {!isLogin && (
-                    <Form.Group className="mb-3">
-                      <Form.Label style={{ color: '#ffd700' }}>
-                        <i className="fas fa-user me-2"></i>Full Name
-                      </Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder="Enter your full name"
-                        className="rounded-pill"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,215,0,0.3)', color: '#fff' }}
-                        required={!isLogin}
-                      />
-                    </Form.Group>
+                    <>
+                      <Form.Group className="mb-3">
+                        <Form.Label style={{ color: '#ffd700' }}>
+                          <i className="fas fa-user me-2"></i>Full Name
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          placeholder="Enter your full name"
+                          className="rounded-pill"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,215,0,0.3)', color: '#fff' }}
+                          required={!isLogin}
+                        />
+                      </Form.Group>
+
+                      <Form.Group className="mb-3">
+                        <Form.Label style={{ color: '#ffd700' }}>
+                          <i className="fas fa-phone me-2"></i>Phone Number (Optional)
+                        </Form.Label>
+                        <Form.Control
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="Enter your phone number"
+                          className="rounded-pill"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,215,0,0.3)', color: '#fff' }}
+                        />
+                      </Form.Group>
+                    </>
                   )}
 
                   <Form.Group className="mb-3">
@@ -362,18 +424,38 @@ const SignIn = () => {
                     type="submit" 
                     className="w-100 py-2 rounded-pill fw-bold mb-3"
                     style={{ background: 'linear-gradient(90deg, #ffd700, #ff8c00)', border: 'none', color: '#1a1a2e' }}
+                    disabled={isLoading}
                   >
-                    <i className={`fas ${isLogin ? 'fa-sign-in-alt' : 'fa-user-plus'} me-2`}></i>
-                    {isLogin ? 'Sign In' : 'Create Account'}
+                    {isLoading ? (
+                      <><i className="fas fa-spinner fa-spin me-2"></i>Processing...</>
+                    ) : (
+                      <><i className={`fas ${isLogin ? 'fa-sign-in-alt' : 'fa-user-plus'} me-2`}></i>{isLogin ? 'Sign In' : 'Create Account'}</>
+                    )}
                   </Button>
 
                   <Button 
                     variant="outline-light" 
                     className="w-100 py-2 rounded-pill mb-3"
                     onClick={handleGuestLogin}
+                    disabled={isLoading}
                   >
                     <i className="fas fa-user-friends me-2"></i> Continue as Guest
                   </Button>
+
+                  {/* Test Google Sheets Button - Remove after testing */}
+                  {!isLogin && (
+                    <div className="text-center mb-3">
+                      <Button 
+                        variant="link" 
+                        className="p-0 text-muted"
+                        onClick={testGoogleSheets}
+                        style={{ fontSize: '12px' }}
+                        disabled={isLoading}
+                      >
+                        <i className="fas fa-plug me-1"></i> Test Google Sheets Connection
+                      </Button>
+                    </div>
+                  )}
 
                   <div className="text-center">
                     <p style={{ color: '#aaa' }}>
@@ -384,7 +466,7 @@ const SignIn = () => {
                         style={{ color: '#ffd700', textDecoration: 'none' }}
                         onClick={() => {
                           setIsLogin(!isLogin);
-                          setFormData({ email: '', password: '', name: '', confirmPassword: '' });
+                          setFormData({ email: '', password: '', name: '', confirmPassword: '', phone: '' });
                           setShowAlert(false);
                         }}
                       >
@@ -394,7 +476,6 @@ const SignIn = () => {
                   </div>
                 </Form>
 
-                {/* Admin Info - Only visible in development */}
                 <div className="mt-3 pt-2 border-top" style={{ borderColor: 'rgba(255,215,0,0.1)' }}>
                   <small style={{ color: '#555', display: 'block', textAlign: 'center' }}>
                     <i className="fas fa-shield-alt me-1"></i>
