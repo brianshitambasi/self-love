@@ -1,6 +1,5 @@
-// components/CoffeeCalendar.jsx - Updated to send admin notifications
+// components/CoffeeCalendar.jsx – Full working version
 import React, { useState } from 'react';
-import { addBookingRequest } from '../utils/adminNotifications';
 
 const CoffeeCalendar = ({ onClose, onSchedule }) => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -13,79 +12,94 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
-  
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
     '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'
   ];
 
-  // Add user notification (for the user who booked)
-  const addUserNotification = (bookingData) => {
-    let notifications = [];
-    const existingNotifications = localStorage.getItem('userNotifications');
-    
-    if (existingNotifications) {
-      notifications = JSON.parse(existingNotifications);
-    }
-    
-    const newNotification = {
+  // Save to user's storage
+  const saveUserBooking = (data) => {
+    let bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+    bookings.unshift({
+      id: Date.now(),
+      type: 'Coffee Chat',
+      date: data.date,
+      time: data.time,
+      status: 'upcoming',
+      icon: 'fa-coffee',
+      color: '#4caf50',
+      with: 'Brian Shitambasi',
+      meetingType: data.meetingType === 'virtual' ? 'Virtual' : 'Phone Call',
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      createdAt: new Date().toISOString()
+    });
+    localStorage.setItem('userBookings', JSON.stringify(bookings));
+  };
+
+  // User notification
+  const addUserNotification = (data) => {
+    let notifs = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+    notifs.unshift({
       id: Date.now(),
       type: 'booking',
       title: '☕ Coffee Chat Scheduled!',
-      message: `Your coffee chat has been scheduled for ${new Date(bookingData.date).toLocaleDateString()} at ${bookingData.time}. Brian will contact you via ${bookingData.email}.`,
+      message: `Your coffee chat is scheduled for ${new Date(data.date).toLocaleDateString()} at ${data.time}. Brian will contact you.`,
       date: new Date().toISOString(),
       read: false,
       icon: 'fa-coffee',
       color: '#ffd700',
       actionLink: '/bookings',
-      bookingDetails: bookingData
-    };
-    
-    notifications.unshift(newNotification);
-    localStorage.setItem('userNotifications', JSON.stringify(notifications));
-    
-    const unreadCount = notifications.filter(n => !n.read).length;
-    localStorage.setItem('notificationCount', unreadCount);
-    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unreadCount }));
-    
-    console.log('User notification saved:', newNotification);
+      bookingDetails: data
+    });
+    localStorage.setItem('userNotifications', JSON.stringify(notifs));
+    const unread = notifs.filter(n => !n.read).length;
+    localStorage.setItem('notificationCount', unread);
+    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unread }));
   };
 
-  // Save user's own booking
-  const saveUserBooking = (bookingData) => {
-    let bookings = [];
-    const existingBookings = localStorage.getItem('userBookings');
-    
-    if (existingBookings) {
-      bookings = JSON.parse(existingBookings);
-    }
-    
-    const newBooking = {
+  // Save to admin storage (so admin sees it)
+  const addAdminNotification = (data) => {
+    // 1. Add to bookingRequests
+    let requests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+    requests.unshift({
       id: Date.now(),
-      type: 'Coffee Chat',
-      date: bookingData.date,
-      time: bookingData.time,
-      status: 'upcoming',
-      icon: 'fa-coffee',
-      color: '#4caf50',
-      with: 'Brian Shitambasi',
-      meetingType: bookingData.meetingType === 'virtual' ? 'Virtual' : 'Phone Call',
-      name: bookingData.name,
-      email: bookingData.email,
-      phone: bookingData.phone,
+      type: 'coffee',
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      date: data.date,
+      time: data.time,
+      meetingType: data.meetingType,
+      status: 'pending',
       createdAt: new Date().toISOString()
-    };
-    
-    bookings.unshift(newBooking);
-    localStorage.setItem('userBookings', JSON.stringify(bookings));
-    
-    console.log('User booking saved:', newBooking);
+    });
+    localStorage.setItem('bookingRequests', JSON.stringify(requests));
+
+    // 2. Add to adminNotifications
+    let adminNotifs = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+    adminNotifs.unshift({
+      id: Date.now(),
+      type: 'new_booking',
+      title: '📅 New Coffee Chat Booking!',
+      message: `${data.name} (${data.email}) scheduled a coffee chat on ${new Date(data.date).toLocaleDateString()} at ${data.time}.`,
+      date: new Date().toISOString(),
+      read: false,
+      icon: 'fa-coffee',
+      color: '#ffd700',
+      bookingDetails: data
+    });
+    localStorage.setItem('adminNotifications', JSON.stringify(adminNotifs));
+
+    const unreadCount = adminNotifs.filter(n => !n.read).length;
+    localStorage.setItem('adminNotificationCount', unreadCount);
+    window.dispatchEvent(new CustomEvent('adminNotificationUpdate', { detail: unreadCount }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     const bookingData = {
       date: selectedDate,
       time: selectedTime,
@@ -93,28 +107,20 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
       email,
       phone,
       meetingType,
-      bookingId: Date.now().toString(),
+      bookingId: Date.now(),
       createdAt: new Date().toISOString()
     };
-
     setTimeout(() => {
-      // Save for the user
       saveUserBooking(bookingData);
       addUserNotification(bookingData);
-      
-      // Send to admin (THIS IS THE KEY - Admin will receive this)
-      const adminRequest = addBookingRequest(bookingData);
-      
+      addAdminNotification(bookingData);
       onSchedule(bookingData);
       setIsSubmitting(false);
-      
-      alert(`✅ Coffee session scheduled successfully!\n\n📅 Date: ${new Date(selectedDate).toLocaleDateString()}\n⏰ Time: ${selectedTime}\n📧 Confirmation sent to: ${email}\n\n🔔 Brian has been notified and will confirm your booking soon.`);
-      
+      alert(`✅ Coffee session scheduled!\n📅 ${new Date(selectedDate).toLocaleDateString()} at ${selectedTime}\n🔔 Admin has been notified.`);
       onClose();
     }, 1000);
   };
 
-  // Rest of your component JSX remains the same...
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={e => e.stopPropagation()}>
@@ -255,7 +261,6 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
   );
 };
 
-// Styles remain the same as your existing styles...
 const styles = {
   overlay: {
     position: 'fixed',
