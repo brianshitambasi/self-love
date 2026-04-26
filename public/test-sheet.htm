@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Google Sheets</title>
+</head>
+<body>
+    <h1>Test Google Sheets Connection</h1>
+    <button onclick="testSheet()">Send Test Data</button>
+    <pre id="result"></pre>
+
+    <script>
+    async function testSheet() {
+        const url = 'https://script.google.com/macros/s/AKfycbzB_tDCX2_Z_Z_c8NTQLkQK_QyTlyZ5z2hnIoX0fovXlwUHFGqUweNZ6Ze4nhg73hGz/exec';
+        
+        document.getElementById('result').innerHTML = 'Sending...';
+        
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: 'Test User ' + new Date().toLocaleTimeString(),
+                    email: 'test@example.com',
+                    ip: '127.0.0.1',
+                    phone: '+254712345678',
+                    referral: 'Test Page',
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString()
+                })
+            });
+            
+            document.getElementById('result').innerHTML = '✅ Test sent! Check your Google Sheet.';
+        } catch (error) {
+            document.getElementById('result').innerHTML = '❌ Error: ' + error.message;
+        }
+    }
+    </script>
+</body>
+</html>
