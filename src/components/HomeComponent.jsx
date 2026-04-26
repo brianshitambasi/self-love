@@ -1,4 +1,4 @@
-// components/HomeComponent.jsx - Complete Updated Version with MemberBenefits
+// components/HomeComponent.jsx - Complete Updated Version with Webinar Notifications
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import CoffeeCalendar from './CoffeeCalendar';
@@ -247,6 +247,75 @@ const HomeComponent = () => {
     console.log('Coffee booking confirmed:', bookingData);
   };
 
+  // Function to create user notification for webinar
+  const addWebinarUserNotification = (webinarData) => {
+    let notifications = [];
+    const existingNotifications = localStorage.getItem('userNotifications');
+    if (existingNotifications) {
+      notifications = JSON.parse(existingNotifications);
+    }
+    
+    const newNotification = {
+      id: Date.now(),
+      type: 'webinar',
+      title: '🎓 Webinar Registration Confirmed!',
+      message: `Thank you for registering for "Code to Cash" webinar. You will receive the webinar link at ${webinarData.email} before the session.`,
+      date: new Date().toISOString(),
+      read: false,
+      icon: 'fa-video',
+      color: '#ff6347',
+      actionLink: '/webinar'
+    };
+    
+    notifications.unshift(newNotification);
+    localStorage.setItem('userNotifications', JSON.stringify(notifications));
+    
+    const unreadCount = notifications.filter(n => !n.read).length;
+    localStorage.setItem('notificationCount', unreadCount);
+    window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unreadCount }));
+  };
+
+  // Function to create admin notification for webinar
+  const addWebinarAdminNotification = (webinarData) => {
+    let notifications = [];
+    const existingNotifications = localStorage.getItem('adminNotifications');
+    if (existingNotifications) {
+      notifications = JSON.parse(existingNotifications);
+    }
+    
+    const newNotification = {
+      id: Date.now(),
+      type: 'webinar_registration',
+      title: '🎓 New Webinar Registration!',
+      message: `${webinarData.name} (${webinarData.email}) has registered for the "Code to Cash" webinar.`,
+      date: new Date().toISOString(),
+      read: false,
+      icon: 'fa-video',
+      color: '#ff6347',
+      details: webinarData
+    };
+    
+    notifications.unshift(newNotification);
+    localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+    
+    // Also save to booking requests
+    let bookingRequests = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
+    bookingRequests.unshift({
+      id: Date.now(),
+      type: 'webinar',
+      name: webinarData.name,
+      email: webinarData.email,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    });
+    localStorage.setItem('bookingRequests', JSON.stringify(bookingRequests));
+    
+    // Update admin notification count
+    const unreadCount = notifications.filter(n => !n.read).length;
+    localStorage.setItem('adminNotificationCount', unreadCount);
+    window.dispatchEvent(new CustomEvent('adminNotificationUpdate', { detail: unreadCount }));
+  };
+
   const handleWebinarSubmit = async (e) => {
     e.preventDefault();
     
@@ -263,7 +332,20 @@ const HomeComponent = () => {
     setIsSubmittingWebinar(true);
     setWebinarMessage('');
     
+    const webinarData = {
+      name: webinarName,
+      email: webinarEmail,
+      registeredAt: new Date().toISOString(),
+      webinarId: 'code-to-cash-' + Date.now()
+    };
+    
     setTimeout(() => {
+      // Add user notification
+      addWebinarUserNotification(webinarData);
+      
+      // Add admin notification
+      addWebinarAdminNotification(webinarData);
+      
       setIsSubmittingWebinar(false);
       setWebinarMessage('success');
       
@@ -272,7 +354,9 @@ const HomeComponent = () => {
         setWebinarName('');
         setWebinarEmail('');
         setWebinarMessage('');
-        alert(`✅ Thank you ${webinarName}! Your spot has been reserved.`);
+        
+        // Show success message with notification info
+        alert(`✅ Thank you ${webinarName}! You've been registered for the "Code to Cash" webinar.\n\n📧 A confirmation has been sent to ${webinarEmail}\n🔔 Check your notifications for details!`);
       }, 1500);
     }, 1500);
   };
