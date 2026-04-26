@@ -1,6 +1,7 @@
-// components/AdminUsers.jsx - With Export/Import
+// components/AdminUsers.jsx - Complete with correct export
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Table, Badge, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { syncUsersFromSheet } from '../services/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -10,8 +11,8 @@ const AdminUsers = () => {
   const [editUserData, setEditUserData] = useState({});
   const [loading, setLoading] = useState(true);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importData, setImportData] = useState('');
   const [alert, setAlert] = useState(null);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -22,7 +23,6 @@ const AdminUsers = () => {
     const registeredUsers = localStorage.getItem('registeredUsers');
     let userList = registeredUsers ? JSON.parse(registeredUsers) : [];
     
-    // Ensure admin is always there
     const adminExists = userList.some(u => u.email === 'admin@apexlegacy.com');
     if (!adminExists) {
       userList.unshift({
@@ -40,7 +40,30 @@ const AdminUsers = () => {
     setLoading(false);
   };
 
-  // Export users to JSON file
+  const syncFromGoogleSheet = async () => {
+    setSyncing(true);
+    setAlert({ type: 'info', message: '🔄 Syncing users from Google Sheet...' });
+    
+    try {
+      const result = await syncUsersFromSheet();
+      
+      if (result.success) {
+        loadUsers();
+        setAlert({ 
+          type: 'success', 
+          message: `✅ Synced ${result.syncedCount} users from Google Sheet!` 
+        });
+      } else {
+        setAlert({ type: 'warning', message: '⚠️ No new users found in Google Sheet.' });
+      }
+    } catch (error) {
+      setAlert({ type: 'danger', message: '❌ Error syncing from Google Sheet' });
+    }
+    
+    setSyncing(false);
+    setTimeout(() => setAlert(null), 5000);
+  };
+
   const exportUsers = () => {
     const exportUsers = users.filter(u => u.role !== 'admin');
     const dataStr = JSON.stringify(exportUsers, null, 2);
@@ -51,11 +74,10 @@ const AdminUsers = () => {
     link.download = `users_export_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    setAlert({ type: 'success', message: 'Users exported successfully!' });
+    setAlert({ type: 'success', message: '📥 Users exported successfully!' });
     setTimeout(() => setAlert(null), 3000);
   };
 
-  // Import users from JSON file
   const importUsers = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -79,31 +101,15 @@ const AdminUsers = () => {
         
         localStorage.setItem('registeredUsers', JSON.stringify(currentUsers));
         loadUsers();
-        setAlert({ type: 'success', message: `Imported ${importedUsers.length} users successfully!` });
+        setAlert({ type: 'success', message: `📤 Imported ${importedUsers.length} users!` });
         setTimeout(() => setAlert(null), 3000);
       } catch (error) {
-        setAlert({ type: 'danger', message: 'Invalid JSON file!' });
+        setAlert({ type: 'danger', message: '❌ Invalid JSON file!' });
         setTimeout(() => setAlert(null), 3000);
       }
     };
     reader.readAsText(file);
     setShowImportModal(false);
-  };
-
-  // Add new user manually
-  const addNewUser = (userData) => {
-    const newUser = {
-      id: Date.now().toString(),
-      ...userData,
-      role: 'user',
-      createdAt: new Date().toISOString()
-    };
-    
-    const updatedUsers = [...users, newUser];
-    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
-    loadUsers();
-    setAlert({ type: 'success', message: `User ${userData.name} added!` });
-    setTimeout(() => setAlert(null), 3000);
   };
 
   const handleDeleteUser = () => {
@@ -113,7 +119,7 @@ const AdminUsers = () => {
       loadUsers();
       setShowDeleteModal(false);
       setSelectedUser(null);
-      setAlert({ type: 'success', message: `User ${selectedUser.name} deleted.` });
+      setAlert({ type: 'success', message: `🗑️ User ${selectedUser.name} deleted.` });
       setTimeout(() => setAlert(null), 3000);
     }
   };
@@ -125,15 +131,15 @@ const AdminUsers = () => {
     localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
     loadUsers();
     setShowEditModal(false);
-    setAlert({ type: 'success', message: `User ${editUserData.name} updated.` });
+    setAlert({ type: 'success', message: `✏️ User ${editUserData.name} updated.` });
     setTimeout(() => setAlert(null), 3000);
   };
 
   const getRoleBadge = (role) => {
     if (role === 'admin') {
-      return <Badge bg="danger">Admin</Badge>;
+      return <Badge bg="danger">👑 Admin</Badge>;
     }
-    return <Badge bg="primary">User</Badge>;
+    return <Badge bg="primary">👤 User</Badge>;
   };
 
   if (loading) {
@@ -166,6 +172,13 @@ const AdminUsers = () => {
               <p style={{ color: '#aaa' }}>View and manage all registered users</p>
             </div>
             <div className="d-flex gap-2">
+              <Button variant="info" size="sm" onClick={syncFromGoogleSheet} disabled={syncing}>
+                {syncing ? (
+                  <><i className="fas fa-spinner fa-spin me-1"></i> Syncing...</>
+                ) : (
+                  <><i className="fas fa-cloud-download-alt me-1"></i> Sync from Sheets</>
+                )}
+              </Button>
               <Button variant="outline-success" size="sm" onClick={exportUsers}>
                 <i className="fas fa-download me-1"></i> Export Users
               </Button>
@@ -179,13 +192,12 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* Info Box */}
         <Card className="border-0 rounded-4 mb-4" style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.2)' }}>
           <Card.Body className="p-3">
             <div className="d-flex align-items-center gap-2">
               <i className="fas fa-info-circle text-warning"></i>
               <small style={{ color: '#aaa' }}>
-                Users register on their own devices. To see all users, export data from each device and import here, or use a shared cloud storage solution.
+                💡 Click <strong>"Sync from Sheets"</strong> to fetch users from Google Sheet
               </small>
             </div>
           </Card.Body>
@@ -218,7 +230,7 @@ const AdminUsers = () => {
                           <code>{user.id.substring(0, 8)}...</code>
                         </div>
                       </td>
-                      <td className="p-3">{user.name}</td>
+                      <td className="p-3"><strong>{user.name}</strong></td>
                       <td className="p-3">{user.email}</td>
                       <td className="p-3">{getRoleBadge(user.role || 'user')}</td>
                       <td className="p-3">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
@@ -249,11 +261,11 @@ const AdminUsers = () => {
                             </>
                           )}
                           {user.role === 'admin' && (
-                            <span className="text-muted">Protected</span>
+                            <span className="text-muted">🔒 Protected</span>
                           )}
                         </div>
-                       </td>
-                     </tr>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -282,10 +294,10 @@ const AdminUsers = () => {
       {/* Import Modal */}
       <Modal show={showImportModal} onHide={() => setShowImportModal(false)} centered>
         <Modal.Header closeButton style={{ background: '#1a1a2e', borderBottom: '1px solid rgba(255,215,0,0.2)' }}>
-          <Modal.Title style={{ color: '#ffd700' }}>Import Users</Modal.Title>
+          <Modal.Title style={{ color: '#ffd700' }}>📁 Import Users</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: '#1a1a2e', color: '#fff' }}>
-          <p>Select a JSON file exported from another device to import users.</p>
+          <p>Select a JSON file to import users.</p>
           <Form.Group>
             <Form.Control
               type="file"
@@ -294,38 +306,35 @@ const AdminUsers = () => {
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,215,0,0.3)', color: '#fff' }}
             />
           </Form.Group>
-          <hr style={{ borderColor: 'rgba(255,215,0,0.2)' }} />
-          <small className="text-muted">Note: This will add new users without removing existing ones.</small>
         </Modal.Body>
         <Modal.Footer style={{ background: '#1a1a2e', borderTop: '1px solid rgba(255,215,0,0.2)' }}>
           <Button variant="secondary" onClick={() => setShowImportModal(false)}>Cancel</Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
         <Modal.Header closeButton style={{ background: '#1a1a2e', borderBottom: '1px solid rgba(255,215,0,0.2)' }}>
-          <Modal.Title style={{ color: '#ffd700' }}>Delete User</Modal.Title>
+          <Modal.Title style={{ color: '#ffd700' }}>⚠️ Delete User</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: '#1a1a2e', color: '#fff' }}>
-          Are you sure you want to delete <strong>{selectedUser?.name}</strong>?
-          <p className="mt-2 small text-danger">⚠️ This action cannot be undone.</p>
+          Delete <strong>{selectedUser?.name}</strong>? This cannot be undone.
         </Modal.Body>
         <Modal.Footer style={{ background: '#1a1a2e', borderTop: '1px solid rgba(255,215,0,0.2)' }}>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-          <Button variant="danger" onClick={handleDeleteUser}>Delete User</Button>
+          <Button variant="danger" onClick={handleDeleteUser}>Delete</Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Edit User Modal */}
+      {/* Edit Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered>
         <Modal.Header closeButton style={{ background: '#1a1a2e', borderBottom: '1px solid rgba(255,215,0,0.2)' }}>
-          <Modal.Title style={{ color: '#ffd700' }}>Edit User</Modal.Title>
+          <Modal.Title style={{ color: '#ffd700' }}>✏️ Edit User</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: '#1a1a2e', color: '#fff' }}>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label style={{ color: '#ffd700' }}>Full Name</Form.Label>
+              <Form.Label style={{ color: '#ffd700' }}>Name</Form.Label>
               <Form.Control
                 type="text"
                 value={editUserData.name || ''}
@@ -334,7 +343,7 @@ const AdminUsers = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label style={{ color: '#ffd700' }}>Email Address</Form.Label>
+              <Form.Label style={{ color: '#ffd700' }}>Email</Form.Label>
               <Form.Control
                 type="email"
                 value={editUserData.email || ''}
@@ -346,7 +355,7 @@ const AdminUsers = () => {
         </Modal.Body>
         <Modal.Footer style={{ background: '#1a1a2e', borderTop: '1px solid rgba(255,215,0,0.2)' }}>
           <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancel</Button>
-          <Button variant="warning" onClick={handleEditUser}>Save Changes</Button>
+          <Button variant="warning" onClick={handleEditUser}>Save</Button>
         </Modal.Footer>
       </Modal>
     </section>
