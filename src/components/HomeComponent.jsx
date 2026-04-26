@@ -1,7 +1,8 @@
-// components/HomeComponent.jsx - Complete Updated Version
+// components/HomeComponent.jsx - Complete Updated Version with MemberBenefits
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import CoffeeCalendar from './CoffeeCalendar';
+import MemberBenefits from './MemberBenefits';
 import { isAuthenticated, getUserRole, ROLES } from '../utils/auth';
 
 const HomeComponent = () => {
@@ -410,24 +411,9 @@ const HomeComponent = () => {
                   </div>
                 )}
 
-                {/* User Only Section - Visible only when logged in */}
+                {/* User Only Section - Enhanced Member Benefits */}
                 {isAuth && userRole !== ROLES.ADMIN && (
-                  <div style={{ 
-                    background: 'linear-gradient(135deg, rgba(76,175,80,0.15), rgba(51,153,255,0.1))',
-                    backdropFilter: 'blur(15px)',
-                    borderRadius: '2rem',
-                    padding: '1rem',
-                    marginTop: '1rem',
-                    marginBottom: '1rem',
-                    border: '1px solid rgba(76,175,80,0.3)'
-                  }}>
-                    <i className="fas fa-star-of-life fa-2x" style={{ color: '#4caf50' }}></i>
-                    <h3 style={{ color: '#4caf50', marginTop: '0.5rem' }}>Member Benefits</h3>
-                    <p style={{ color: '#ddd' }}>Access exclusive content, track your progress, and get personalized mentorship.</p>
-                    <div className="d-flex gap-2 justify-content-center">
-                      <button className="btn btn-success btn-sm" onClick={() => window.location.href = '/dashboard'}>Go to Dashboard</button>
-                    </div>
-                  </div>
+                  <MemberBenefits />
                 )}
 
                 {/* Guest Only Section - Only for non-logged in users */}
