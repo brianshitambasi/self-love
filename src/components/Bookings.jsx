@@ -1,88 +1,134 @@
-// components/Bookings.jsx
+// components/Bookings.jsx - Updated with real data from localStorage
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Modal } from 'react-bootstrap';
 
 const Bookings = () => {
-  const [bookings, setBookings] = useState([
-    {
-      id: 1,
-      type: 'Coffee Chat',
-      date: '2024-01-20',
-      time: '10:00 AM',
-      status: 'upcoming',
-      icon: 'fa-coffee',
-      color: '#ffd700',
-      with: 'Brian Shitambasi',
-      meetingType: 'Virtual'
-    },
-    {
-      id: 2,
-      type: 'Webinar',
-      date: '2024-01-25',
-      time: '7:00 PM',
-      status: 'upcoming',
-      icon: 'fa-video',
-      color: '#ff6347',
-      with: 'Wealth Renaissance Team',
-      meetingType: 'Live Webinar'
-    },
-    {
-      id: 3,
-      type: 'Coffee Chat',
-      date: '2024-01-10',
-      time: '2:00 PM',
-      status: 'completed',
-      icon: 'fa-coffee',
-      color: '#4caf50',
-      with: 'Brian Shitambasi',
-      meetingType: 'Virtual'
-    },
-    {
-      id: 4,
-      type: 'Webinar',
-      date: '2024-01-05',
-      time: '7:00 PM',
-      status: 'completed',
-      icon: 'fa-video',
-      color: '#4caf50',
-      with: 'Success Team',
-      meetingType: 'Live Webinar'
-    }
-  ]);
-
+  const [bookings, setBookings] = useState([]);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedBookings = localStorage.getItem('userBookings');
-    if (savedBookings) {
-      setBookings(JSON.parse(savedBookings));
-    }
+    loadBookings();
   }, []);
 
+  const loadBookings = () => {
+    setLoading(true);
+    
+    // Load user's own bookings from localStorage
+    const savedBookings = localStorage.getItem('userBookings');
+    let userBookings = savedBookings ? JSON.parse(savedBookings) : [];
+    
+    // Also load booking requests (admin approved ones)
+    const allBookingRequests = localStorage.getItem('bookingRequests');
+    let allBookings = allBookingRequests ? JSON.parse(allBookingRequests) : [];
+    
+    // Get current user email
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const userEmail = currentUser.email || localStorage.getItem('userEmail');
+    
+    // Filter bookings for current user
+    const userSpecificBookings = allBookings.filter(booking => 
+      booking.email === userEmail
+    );
+    
+    // Combine and format bookings
+    const formattedUserBookings = userBookings.map(booking => ({
+      ...booking,
+      type: 'Coffee Chat',
+      icon: 'fa-coffee',
+      color: booking.status === 'completed' ? '#4caf50' : '#ffd700',
+      with: 'Brian Shitambasi',
+      status: booking.status || 'upcoming'
+    }));
+    
+    const formattedRequestBookings = userSpecificBookings.map(booking => ({
+      id: booking.id,
+      type: 'Coffee Chat',
+      date: new Date(booking.date).toLocaleDateString(),
+      time: booking.time,
+      status: booking.status || 'pending',
+      icon: 'fa-coffee',
+      color: booking.status === 'confirmed' ? '#4caf50' : booking.status === 'cancelled' ? '#f44336' : '#ffd700',
+      with: 'Brian Shitambasi',
+      meetingType: booking.meetingType === 'virtual' ? 'Virtual' : 'Phone Call',
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone
+    }));
+    
+    // Combine all bookings and sort by date
+    const allCombined = [...formattedUserBookings, ...formattedRequestBookings];
+    const sortedBookings = allCombined.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    setBookings(sortedBookings);
+    setLoading(false);
+  };
+
   const handleCancelBooking = () => {
-    const updatedBookings = bookings.filter(b => b.id !== selectedBooking.id);
-    setBookings(updatedBookings);
+    // Remove from userBookings
+    const savedBookings = localStorage.getItem('userBookings');
+    let userBookings = savedBookings ? JSON.parse(savedBookings) : [];
+    const updatedBookings = userBookings.filter(b => b.id !== selectedBooking.id);
     localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
+    
+    // Also update booking requests status
+    const allBookingRequests = localStorage.getItem('bookingRequests');
+    if (allBookingRequests) {
+      let requests = JSON.parse(allBookingRequests);
+      const updatedRequests = requests.map(req => 
+        req.id === selectedBooking.id ? { ...req, status: 'cancelled' } : req
+      );
+      localStorage.setItem('bookingRequests', JSON.stringify(updatedRequests));
+    }
+    
+    loadBookings();
     setShowCancelModal(false);
-    alert('Booking cancelled successfully!');
+    alert('❌ Booking cancelled successfully!');
   };
 
   const getStatusBadge = (status) => {
     switch(status) {
       case 'upcoming':
-        return <Badge bg="warning" className="rounded-pill">Upcoming</Badge>;
+        return <Badge bg="warning" className="rounded-pill">⏳ Upcoming</Badge>;
+      case 'confirmed':
+        return <Badge bg="success" className="rounded-pill">✅ Confirmed</Badge>;
       case 'completed':
-        return <Badge bg="success" className="rounded-pill">Completed</Badge>;
+        return <Badge bg="success" className="rounded-pill">✓ Completed</Badge>;
       case 'cancelled':
-        return <Badge bg="danger" className="rounded-pill">Cancelled</Badge>;
+        return <Badge bg="danger" className="rounded-pill">✗ Cancelled</Badge>;
+      case 'pending':
+        return <Badge bg="info" className="rounded-pill">⏰ Pending Approval</Badge>;
       default:
         return <Badge bg="secondary" className="rounded-pill">{status}</Badge>;
     }
   };
 
-  const upcomingBookings = bookings.filter(b => b.status === 'upcoming');
-  const pastBookings = bookings.filter(b => b.status === 'completed');
+  const upcomingBookings = bookings.filter(b => 
+    b.status === 'upcoming' || b.status === 'confirmed' || b.status === 'pending'
+  );
+  const pastBookings = bookings.filter(b => 
+    b.status === 'completed' || b.status === 'cancelled'
+  );
+
+  if (loading) {
+    return (
+      <section style={{ 
+        background: 'linear-gradient(135deg, #05070a 0%, #0a0f1a 100%)', 
+        minHeight: '100vh', 
+        paddingTop: '100px',
+        paddingBottom: '60px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="fas fa-spinner fa-spin fa-3x" style={{ color: '#ffd700' }}></i>
+          <p style={{ color: '#aaa', marginTop: '1rem' }}>Loading your bookings...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section style={{ 
@@ -102,7 +148,7 @@ const Bookings = () => {
         {/* Upcoming Bookings */}
         <div className="mb-5">
           <h3 className="fw-bold mb-3" style={{ color: '#ffd700' }}>
-            <i className="fas fa-calendar-alt me-2"></i> Upcoming
+            <i className="fas fa-calendar-alt me-2"></i> Upcoming ({upcomingBookings.length})
           </h3>
           {upcomingBookings.length === 0 ? (
             <Card className="border-0 rounded-4 text-center p-5" style={{ background: 'rgba(15, 20, 30, 0.85)', border: '1px solid rgba(255,215,0,0.2)' }}>
@@ -142,12 +188,14 @@ const Bookings = () => {
                         <Button variant="warning" size="sm" className="rounded-pill flex-grow-1">
                           <i className="fas fa-edit me-1"></i> Reschedule
                         </Button>
-                        <Button variant="outline-danger" size="sm" className="rounded-pill flex-grow-1" onClick={() => {
-                          setSelectedBooking(booking);
-                          setShowCancelModal(true);
-                        }}>
-                          <i className="fas fa-times me-1"></i> Cancel
-                        </Button>
+                        {booking.status !== 'cancelled' && (
+                          <Button variant="outline-danger" size="sm" className="rounded-pill flex-grow-1" onClick={() => {
+                            setSelectedBooking(booking);
+                            setShowCancelModal(true);
+                          }}>
+                            <i className="fas fa-times me-1"></i> Cancel
+                          </Button>
+                        )}
                       </div>
                     </Card.Body>
                   </Card>
@@ -161,7 +209,7 @@ const Bookings = () => {
         {pastBookings.length > 0 && (
           <div>
             <h3 className="fw-bold mb-3" style={{ color: '#aaa' }}>
-              <i className="fas fa-history me-2"></i> Past Bookings
+              <i className="fas fa-history me-2"></i> Past ({pastBookings.length})
             </h3>
             <Row>
               {pastBookings.map((booking) => (
