@@ -13,6 +13,8 @@ import Bookings from './components/Bookings';
 import SignIn from './components/SignIn';
 import Notifications from './components/Notifications';
 import AdminNotifications from './components/AdminNotifications';
+import AdminUsers from './components/AdminUsers';
+import AdminAnalytics from './components/AdminAnalytics';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, getUserRole, ROLES } from './utils/auth';
 import './App.css';
@@ -94,6 +96,16 @@ function App() {
           } />
           
           {/* Admin Only Routes */}
+          <Route path="/admin/users" element={
+            <ProtectedRouteComponent requiredRole={ROLES.ADMIN}>
+              <AdminUsers />
+            </ProtectedRouteComponent>
+          } />
+          <Route path="/admin/analytics" element={
+            <ProtectedRouteComponent requiredRole={ROLES.ADMIN}>
+              <AdminAnalytics />
+            </ProtectedRouteComponent>
+          } />
           <Route path="/admin/bookings" element={
             <ProtectedRouteComponent requiredRole={ROLES.ADMIN}>
               <AdminNotifications />
