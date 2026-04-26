@@ -377,7 +377,7 @@ const HomeComponent = () => {
     { icon: "fa-github", title: "GITHUB", color: "#ffffff", url: "https://github.com/brianshitambasi" },
     { icon: "fa-linkedin", title: "LINKEDIN", color: "#0077b5", url: "https://www.linkedin.com/in/brian-shitambasi-613050396" },
     { icon: "fa-twitter", title: "X (TWITTER)", color: "#1DA1F2", url: "https://twitter.com/BrianShita48844" },
-    { icon: "fa-facebook", title: "FACEBOOK", color: "#3b5998", url: "https://facebook.com/BrianJecks" },
+    { icon: "fa-facebook", title: "FACEBOOK", color: "#3b5998", url: "https://facebook.com/Brian Burnix" },
     { icon: "fa-instagram", title: "INSTAGRAM", color: "#e4405f", url: "https://instagram.com/ceo_brian58" },
     { icon: "fa-tiktok", title: "TIKTOK", color: "#000000", url: "https://tiktok.com/@.brian005" },
     { icon: "fa-youtube", title: "YOUTUBE", color: "#FF0000", url: "https://youtube.com/@yobby-5" },
