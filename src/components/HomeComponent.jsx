@@ -1,4 +1,4 @@
-// components/HomeComponent.jsx - Complete Updated Version with Webinar Notifications
+// components/HomeComponent.jsx - Complete Updated Version with Bonan Vivon Link
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import CoffeeCalendar from './CoffeeCalendar';
@@ -340,10 +340,7 @@ const HomeComponent = () => {
     };
     
     setTimeout(() => {
-      // Add user notification
       addWebinarUserNotification(webinarData);
-      
-      // Add admin notification
       addWebinarAdminNotification(webinarData);
       
       setIsSubmittingWebinar(false);
@@ -354,8 +351,6 @@ const HomeComponent = () => {
         setWebinarName('');
         setWebinarEmail('');
         setWebinarMessage('');
-        
-        // Show success message with notification info
         alert(`✅ Thank you ${webinarName}! You've been registered for the "Code to Cash" webinar.\n\n📧 A confirmation has been sent to ${webinarEmail}\n🔔 Check your notifications for details!`);
       }, 1500);
     }, 1500);
@@ -375,19 +370,19 @@ const HomeComponent = () => {
     { icon: "fa-handshake", title: "Business Consulting", desc: "Strategic growth planning" }
   ];
 
-
-   const links = [
-  { icon: "fa-gem", title: "GO DIAMOND PROJECT", color: "#ffd700", url: "/diamond" },
-  { icon: "fa-github", title: "GITHUB", color: "#ffffff", url: "https://github.com/brianshitambasi" },
-  { icon: "fa-linkedin", title: "LINKEDIN", color: "#0077b5", url: "https://www.linkedin.com/in/brian-shitambasi-613050396" },
- { icon: "fa-twitter", title: "X (TWITTER)", color: "#1DA1F2", url: "https://twitter.com/BrianShita48844" },
-  { icon: "fa-facebook", title: "FACEBOOK", color: "#3b5998", url: "https://facebook.com/BrianJecks" },
-  { icon: "fa-instagram", title: "INSTAGRAM", color: "#e4405f", url: "https://instagram.com/ceo_brian58" },
-  { icon: "fa-tiktok", title: "TIKTOK", color: "#000000", url: "https://tiktok.com/@.brian005" },
-  { icon: "fa-youtube", title: "YOUTUBE", color: "#FF0000", url: "https://youtube.com/@yobby-5" },
-  { icon: "fa-envelope", title: "EMAIL ME", color: "#ffd700", url: "mailto:brianshtambasi270@gmail.com" }
-];
-
+  // Updated links with Bonan Vivon Project
+  const links = [
+    { icon: "fa-gem", title: "GO DIAMOND PROJECT", color: "#ffd700", url: "/diamond" },
+    { icon: "fa-globe", title: "BONAN VIVON PROJECT", color: "#00bcd4", url: "https://golden-dreamers.vercel.app" },
+    { icon: "fa-github", title: "GITHUB", color: "#ffffff", url: "https://github.com/brianshitambasi" },
+    { icon: "fa-linkedin", title: "LINKEDIN", color: "#0077b5", url: "https://www.linkedin.com/in/brian-shitambasi-613050396" },
+    { icon: "fa-twitter", title: "X (TWITTER)", color: "#1DA1F2", url: "https://twitter.com/BrianShita48844" },
+    { icon: "fa-facebook", title: "FACEBOOK", color: "#3b5998", url: "https://facebook.com/BrianJecks" },
+    { icon: "fa-instagram", title: "INSTAGRAM", color: "#e4405f", url: "https://instagram.com/ceo_brian58" },
+    { icon: "fa-tiktok", title: "TIKTOK", color: "#000000", url: "https://tiktok.com/@.brian005" },
+    { icon: "fa-youtube", title: "YOUTUBE", color: "#FF0000", url: "https://youtube.com/@yobby-5" },
+    { icon: "fa-envelope", title: "EMAIL ME", color: "#ffd700", url: "mailto:brianshitambasi270@gmail.com" }
+  ];
 
   return (
     <>
@@ -646,22 +641,22 @@ const HomeComponent = () => {
                 <div style={contactStyles.card}>
                   <i className="fas fa-envelope" style={contactStyles.icon}></i>
                   <h4 style={contactStyles.title}>Email</h4>
-                  <a href="mailto:brianshtambasi270@gmail.com" style={contactStyles.link}>
-                    brianshtambasi270@gmail.com
+                  <a href="mailto:brianshitambasi270@gmail.com" style={contactStyles.link}>
+                    brianshitambasi270@gmail.com
                   </a>
                 </div>
                 <div style={contactStyles.card}>
                   <i className="fab fa-linkedin" style={contactStyles.icon}></i>
                   <h4 style={contactStyles.title}>LinkedIn</h4>
-                  <a href="https://www.linkedin.com/in/brianshitambasi" target="_blank" rel="noopener noreferrer" style={contactStyles.link}>
-                    linkedin.com/in/brianshitambasi
+                  <a href="https://www.linkedin.com/in/brian-shitambasi-613050396" target="_blank" rel="noopener noreferrer" style={contactStyles.link}>
+                    linkedin.com/in/brian-shitambasi-613050396
                   </a>
                 </div>
                 <div style={contactStyles.card}>
                   <i className="fab fa-twitter" style={contactStyles.icon}></i>
                   <h4 style={contactStyles.title}>X (Twitter)</h4>
-                  <a href="https://twitter.com/brianshitambasi" target="_blank" rel="noopener noreferrer" style={contactStyles.link}>
-                    @brianshitambasi
+                  <a href="https://twitter.com/BrianShita48844" target="_blank" rel="noopener noreferrer" style={contactStyles.link}>
+                    @BrianShita48844
                   </a>
                 </div>
                 <div style={contactStyles.card}>
