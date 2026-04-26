@@ -1,5 +1,6 @@
-// components/CoffeeCalendar.jsx - Fixed notification system
+// components/CoffeeCalendar.jsx - Updated to send admin notifications
 import React, { useState } from 'react';
+import { addBookingRequest } from '../utils/adminNotifications';
 
 const CoffeeCalendar = ({ onClose, onSchedule }) => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -18,9 +19,8 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
     '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'
   ];
 
-  // Function to add notification to localStorage
-  const addNotification = (bookingData) => {
-    // Get existing notifications
+  // Add user notification (for the user who booked)
+  const addUserNotification = (bookingData) => {
     let notifications = [];
     const existingNotifications = localStorage.getItem('userNotifications');
     
@@ -28,7 +28,6 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
       notifications = JSON.parse(existingNotifications);
     }
     
-    // Create new notification
     const newNotification = {
       id: Date.now(),
       type: 'booking',
@@ -42,27 +41,18 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
       bookingDetails: bookingData
     };
     
-    // Add to notifications array (add to beginning)
     notifications.unshift(newNotification);
-    
-    // Save back to localStorage
     localStorage.setItem('userNotifications', JSON.stringify(notifications));
     
-    // Update notification count
     const unreadCount = notifications.filter(n => !n.read).length;
     localStorage.setItem('notificationCount', unreadCount);
-    
-    // Dispatch event to update navbar in real-time
     window.dispatchEvent(new CustomEvent('notificationUpdate', { detail: unreadCount }));
     
-    console.log('Notification saved:', newNotification);
-    console.log('All notifications:', notifications);
-    
-    return newNotification;
+    console.log('User notification saved:', newNotification);
   };
 
-  // Function to save booking
-  const saveBooking = (bookingData) => {
+  // Save user's own booking
+  const saveUserBooking = (bookingData) => {
     let bookings = [];
     const existingBookings = localStorage.getItem('userBookings');
     
@@ -89,7 +79,7 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
     bookings.unshift(newBooking);
     localStorage.setItem('userBookings', JSON.stringify(bookings));
     
-    console.log('Booking saved:', newBooking);
+    console.log('User booking saved:', newBooking);
   };
 
   const handleSubmit = async (e) => {
@@ -107,24 +97,24 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
       createdAt: new Date().toISOString()
     };
 
-    // Simulate API call
     setTimeout(() => {
-      // Save booking to localStorage
-      saveBooking(bookingData);
+      // Save for the user
+      saveUserBooking(bookingData);
+      addUserNotification(bookingData);
       
-      // Add notification to the system
-      const notification = addNotification(bookingData);
+      // Send to admin (THIS IS THE KEY - Admin will receive this)
+      const adminRequest = addBookingRequest(bookingData);
       
       onSchedule(bookingData);
       setIsSubmitting(false);
       
-      // Show success message with notification details
-      alert(`✅ Coffee session scheduled successfully!\n\n📅 Date: ${new Date(selectedDate).toLocaleDateString()}\n⏰ Time: ${selectedTime}\n📧 Confirmation sent to: ${email}\n\n🔔 A notification has been added to your notification center. Click the bell icon to view it!`);
+      alert(`✅ Coffee session scheduled successfully!\n\n📅 Date: ${new Date(selectedDate).toLocaleDateString()}\n⏰ Time: ${selectedTime}\n📧 Confirmation sent to: ${email}\n\n🔔 Brian has been notified and will confirm your booking soon.`);
       
       onClose();
     }, 1000);
   };
 
+  // Rest of your component JSX remains the same...
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={e => e.stopPropagation()}>
@@ -265,6 +255,7 @@ const CoffeeCalendar = ({ onClose, onSchedule }) => {
   );
 };
 
+// Styles remain the same as your existing styles...
 const styles = {
   overlay: {
     position: 'fixed',

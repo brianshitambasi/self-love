@@ -12,11 +12,15 @@ import Dashboard from './components/Dashboard';
 import Bookings from './components/Bookings';
 import SignIn from './components/SignIn';
 import Notifications from './components/Notifications';
+import AdminNotifications from './components/AdminNotifications';
+import ProtectedRoute from './components/ProtectedRoute';
+import { isAuthenticated, getUserRole, ROLES } from './utils/auth';
 import './App.css';
 
 function App() {
   // Check if user is logged in
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const isLoggedIn = isAuthenticated();
+  const userRole = getUserRole();
 
   useEffect(() => {
     const handleDropdownClick = (e) => {
@@ -41,22 +45,62 @@ function App() {
     };
   }, []);
 
+  // Protected route wrapper
+  const ProtectedRouteComponent = ({ children, requiredRole = null }) => {
+    if (!isLoggedIn) {
+      window.location.href = '/login';
+      return null;
+    }
+    
+    if (requiredRole && userRole !== requiredRole && userRole !== ROLES.ADMIN) {
+      window.location.href = '/dashboard';
+      return null;
+    }
+    
+    return children;
+  };
+
   return (
     <Router>
       <div className="App">
         <NavigationBar />
         <Routes>
-          {/* Main Routes */}
+          {/* Main Routes - Public */}
           <Route path="/" element={<HomeComponent />} />
           <Route path="/about" element={<AboutMe />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/go-diamond" element={<GoDiamondPage />} />
           
-          {/* User Account Routes */}
-          <Route path="/profile" element={isLoggedIn ? <Profile /> : <SignIn />} />
-          <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <SignIn />} />
-          <Route path="/bookings" element={isLoggedIn ? <Bookings /> : <SignIn />} />
-          <Route path="/notifications" element={<Notifications />} />
+          {/* User Account Routes - Protected */}
+          <Route path="/profile" element={
+            <ProtectedRouteComponent>
+              <Profile />
+            </ProtectedRouteComponent>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRouteComponent>
+              <Dashboard />
+            </ProtectedRouteComponent>
+          } />
+          <Route path="/bookings" element={
+            <ProtectedRouteComponent>
+              <Bookings />
+            </ProtectedRouteComponent>
+          } />
+          <Route path="/notifications" element={
+            <ProtectedRouteComponent>
+              <Notifications />
+            </ProtectedRouteComponent>
+          } />
+          
+          {/* Admin Only Routes */}
+          <Route path="/admin/bookings" element={
+            <ProtectedRouteComponent requiredRole={ROLES.ADMIN}>
+              <AdminNotifications />
+            </ProtectedRouteComponent>
+          } />
+          
+          {/* Auth Routes */}
           <Route path="/login" element={<SignIn />} />
           
           {/* Program Routes */}
